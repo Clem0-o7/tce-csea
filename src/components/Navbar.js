@@ -1,89 +1,121 @@
-import { useState, useEffect } from "react";
-import { useTheme } from "next-themes";
-import Image from "next/image";
-import { Moon, Sun, Menu, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/app-sidebar";
+"use client"
+
+import { useState, useEffect } from "react"
+import { useTheme } from "next-themes"
+import Image from "next/image"
+import Link from "next/link"
+import { Moon, Sun, Menu } from 'lucide-react'
+import { Button } from "@/components/ui/button"
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet"
+import { cn } from "@/lib/utils"
+
+const navItems = [
+  { href: "#home", label: "Home" },
+  { href: "#about", label: "About" },
+  { href: "#events", label: "Events" },
+  { href: "#winners", label: "Winners" },
+  { href: "#gallery", label: "Gallery" },
+]
 
 export function Navbar() {
-  const [isOpen, setIsOpen] = useState(false);
-  const { theme, setTheme, systemTheme } = useTheme(); // Access system theme as fallback
+  const [isScrolled, setIsScrolled] = useState(false)
+  const { setTheme, theme } = useTheme()
 
-  // Ensure theme applies correctly on initial load
   useEffect(() => {
-    const root = document.documentElement;
-
-    // Apply "dark" class based on current theme or system preference
-    const currentTheme = theme === "system" ? systemTheme : theme;
-    if (currentTheme === "dark") {
-      root.classList.add("dark");
-    } else {
-      root.classList.remove("dark");
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 0)
     }
-  }, [theme, systemTheme]);
-
-  const handleToggle = () => setIsOpen(!isOpen);
+    window.addEventListener("scroll", handleScroll)
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
 
   return (
     <header
-      className="flex items-center justify-between p-4"
-      style={{
-        backgroundColor: "var(--background)",
-        color: "var(--foreground)",
-      }}
-    >
-      {/* Logo */}
-      <div className="flex items-center">
-        <Image src="/logo/logo.webp" alt="Logo" width={50} height={50} />
-      </div>
-
-      {/* Navbar links for larger screens */}
-      <nav className="hidden md:flex flex-1 justify-center space-x-4">
-        <Link href="/" className="btn-nav">Home</Link>
-        <Link href="/about" className="btn-nav">About</Link>
-        <Link href="/events" className="btn-nav">Events</Link>
-        <Link href="/winners" className="btn-nav">Winners</Link>
-        <Link href="/gallery" className="btn-nav">Gallery</Link>
-      </nav>
-
-      {/* Dark mode toggle */}
-      <div className="flex items-center space-x-2">
-        <ModeToggle />
-      </div>
-
-      {/* Hamburger Menu for Mobile */}
-      <div className="md:hidden flex items-center space-x-4">
-        <Button onClick={handleToggle} variant="outline" className="dark:text-white">
-          {isOpen ? <X size={24} /> : <Menu size={24} />}
-        </Button>
-      </div>
-
-      {/* Mobile Sidebar */}
-      {isOpen && (
-        <SidebarProvider>
-          <AppSidebar />
-        </SidebarProvider>
+      className={cn(
+        "fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out",
+        isScrolled
+          ? "bg-background/80 backdrop-blur-md shadow-md"
+          : "bg-transparent"
       )}
+    >
+      <div className="container mx-auto px-4">
+        <div className="flex items-center justify-between py-4">
+          <Link href="#top" className="flex items-center space-x-2">
+            <Image
+              src="/logo/logo.webp"
+              alt="Logo"
+              width={40}
+              height={40}
+              className="transition-transform duration-300 ease-in-out hover:scale-110"
+            />
+            <span className="font-bold text-xl">YourBrand</span>
+          </Link>
+
+          <nav className="hidden md:flex space-x-4">
+            {navItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="text-foreground/60 hover:text-foreground transition-colors duration-200"
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+
+          <div className="flex items-center space-x-2">
+            <ModeToggle />
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="outline" size="icon" className="md:hidden">
+                  <Menu className="h-5 w-5" />
+                  <span className="sr-only">Toggle menu</span>
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[300px] sm:w-[400px]">
+                <SheetHeader>
+                  <SheetTitle>Menu</SheetTitle>
+                </SheetHeader>
+                <nav className="flex flex-col space-y-4 mt-8">
+                  {navItems.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className="text-foreground/60 hover:text-foreground transition-colors duration-200"
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                </nav>
+              </SheetContent>
+            </Sheet>
+          </div>
+        </div>
+      </div>
     </header>
-  );
+  )
 }
 
-// Mode Toggle Component
 function ModeToggle() {
-  const { theme, setTheme } = useTheme();
+  const { setTheme, theme } = useTheme()
 
   return (
     <Button
       variant="outline"
       size="icon"
       onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-      className="relative dark:text-white"
+      className="relative"
     >
-      <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-transform duration-300 dark:-rotate-90 dark:scale-0" />
-      <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-transform duration-300 dark:rotate-0 dark:scale-100" />
+      <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+      <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
       <span className="sr-only">Toggle theme</span>
     </Button>
-  );
+  )
 }
+

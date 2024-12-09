@@ -1,24 +1,31 @@
-import { useEffect } from "react";
-import { Navbar } from "@/components/Navbar";
-import { useTheme } from "next-themes";
+import { Navbar } from "@/components/Navbar"; // Import your Navbar component
+import { Button } from "@/components/ui/button"; // Import button or any other components if needed
 
 export default function Home() {
-  const { theme } = useTheme();
-
-  useEffect(() => {
-    console.log("Current theme:", theme);
-    console.log("HTML class:", document.documentElement.className);
-  }, [theme]);
-
   return (
     <div>
-      <Navbar />
-      <main className="min-h-screen  flex flex-col justify-center items-center py-16">
-        <h1 className="text-4xl font-bold text-primary">Welcome to CSEA Website!</h1>
-        <p className="text-lg mt-4">
-          Computer Science and Engineering Association
-        </p>
-      </main>
+      <Navbar />  {/* Render Navbar at the top */}
+
+      {/* Sections for each page */}
+      <section id="home" className="min-h-screen bg-blue-100 flex items-center justify-center">
+        <h2 className="text-3xl font-bold">Home Section</h2>
+      </section>
+
+      <section id="about" className="min-h-screen bg-green-100 flex items-center justify-center">
+        <h2 className="text-3xl font-bold">About Section</h2>
+      </section>
+
+      <section id="events" className="min-h-screen bg-red-100 flex items-center justify-center">
+        <h2 className="text-3xl font-bold">Events Section</h2>
+      </section>
+
+      <section id="winners" className="min-h-screen bg-yellow-100 flex items-center justify-center">
+        <h2 className="text-3xl font-bold">Winners Section</h2>
+      </section>
+
+      <section id="gallery" className="min-h-screen bg-purple-100 flex items-center justify-center">
+        <h2 className="text-3xl font-bold">Gallery Section</h2>
+      </section>
     </div>
   );
 }
