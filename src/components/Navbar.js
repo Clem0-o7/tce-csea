@@ -4,16 +4,15 @@ import { useState, useEffect } from "react"
 import { useTheme } from "next-themes"
 import Image from "next/image"
 import Link from "next/link"
-import { Moon, Sun, Menu } from 'lucide-react'
+import { Moon, Sun, Menu, X } from 'lucide-react'
 import { Button } from "@/components/ui/button"
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet"
 import { cn } from "@/lib/utils"
+import { Poppins } from 'next/font/google'
+
+const poppins = Poppins({
+  subsets: ['latin'],
+  weight: ['600'],
+})
 
 const navItems = [
   { href: "#home", label: "Home" },
@@ -25,44 +24,72 @@ const navItems = [
 
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false)
+  const [currentPage, setCurrentPage] = useState("#home")
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
   const { setTheme, theme } = useTheme()
+  const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 0)
     }
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768)
+      if (window.innerWidth >= 768) {
+        setIsMenuOpen(false)
+      }
+    }
     window.addEventListener("scroll", handleScroll)
-    return () => window.removeEventListener("scroll", handleScroll)
+    window.addEventListener("resize", handleResize)
+    handleResize()
+    return () => {
+      window.removeEventListener("scroll", handleScroll)
+      window.removeEventListener("resize", handleResize)
+    }
   }, [])
+
+  const handleNavClick = (href) => {
+    setCurrentPage(href)
+    setIsMenuOpen(false)
+  }
+
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen)
+  }
 
   return (
     <header
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out",
-        isScrolled
-          ? "bg-background/80 backdrop-blur-md shadow-md"
-          : "bg-transparent"
+        "fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out bg-background/80 backdrop-blur-md",
+        isScrolled || isMenuOpen ? "shadow-md" : ""
       )}
     >
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between py-4">
-          <Link href="#top" className="flex items-center space-x-2">
+          <Link href="#top" className="flex items-center space-x-3">
             <Image
               src="/logo/logo.webp"
               alt="Logo"
-              width={40}
-              height={40}
+              width={58}
+              height={58}
               className="transition-transform duration-300 ease-in-out hover:scale-110"
             />
-            <span className="font-bold text-xl">YourBrand</span>
+            <span className={`font-semibold text-2xl ${poppins.className} text-foreground`}>CSEA</span>
           </Link>
 
-          <nav className="hidden md:flex space-x-4">
+          <nav className={cn(
+            "md:flex md:space-x-4",
+            isMobile ? (isMenuOpen ? "flex flex-col items-center space-y-4 absolute top-full left-0 right-0 bg-background py-4 shadow-md" : "hidden") : ""
+          )}>
             {navItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className="text-foreground/60 hover:text-foreground transition-colors duration-200"
+                className={cn(
+                  "text-foreground/60 hover:text-foreground transition-colors duration-200",
+                  currentPage === item.href && "text-foreground font-semibold"
+                )}
+                onClick={() => handleNavClick(item.href)}
               >
                 {item.label}
               </Link>
@@ -71,30 +98,14 @@ export function Navbar() {
 
           <div className="flex items-center space-x-2">
             <ModeToggle />
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="outline" size="icon" className="md:hidden">
-                  <Menu className="h-5 w-5" />
-                  <span className="sr-only">Toggle menu</span>
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="right" className="w-[300px] sm:w-[400px]">
-                <SheetHeader>
-                  <SheetTitle>Menu</SheetTitle>
-                </SheetHeader>
-                <nav className="flex flex-col space-y-4 mt-8">
-                  {navItems.map((item) => (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      className="text-foreground/60 hover:text-foreground transition-colors duration-200"
-                    >
-                      {item.label}
-                    </Link>
-                  ))}
-                </nav>
-              </SheetContent>
-            </Sheet>
+            <Button variant="ghost" size="icon" onClick={toggleMenu} className="md:hidden">
+              {isMenuOpen ? (
+                <X className="h-5 w-5" />
+              ) : (
+                <Menu className="h-5 w-5" />
+              )}
+              <span className="sr-only">Toggle menu</span>
+            </Button>
           </div>
         </div>
       </div>
@@ -107,7 +118,7 @@ function ModeToggle() {
 
   return (
     <Button
-      variant="outline"
+      variant="ghost"
       size="icon"
       onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
       className="relative"
