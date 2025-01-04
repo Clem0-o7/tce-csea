@@ -1,145 +1,140 @@
-
 import { useState } from 'react';
-import Head from 'next/head';
-import Image from 'next/image';
-import { motion } from 'framer-motion';
-import Navbar from '@/components/Navbar';
+import { Navbar } from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { getAllGalleryImages } from '@/db/queries/gallery';
+import { useIsMobile } from '@/hooks/use-mobile';
+import Image from 'next/image';
+import { groupBy } from 'lodash';
+import Masonry from 'react-masonry-css';
+import { ThemeProvider } from 'next-themes';
+import Head from 'next/head';
+import { formatISO } from 'date-fns';
+import Link from 'next/link';
 
-const images = [
-  { id: 1, src: '/images/gallery/image1.jpg', alt: 'CSEA Event 1' },
-  { id: 2, src: '/images/gallery/image2.jpg', alt: 'CSEA Event 2' },
-  { id: 3, src: '/images/gallery/image3.jpg', alt: 'CSEA Event 3' },
-  { id: 4, src: '/images/gallery/image4.jpg', alt: 'CSEA Event 4' },
-  { id: 5, src: '/images/gallery/image5.jpg', alt: 'CSEA Event 5' },
-  { id: 6, src: '/images/gallery/image6.jpg', alt: 'CSEA Event 6' },
-  { id: 7, src: '/images/gallery/image7.jpg', alt: 'CSEA Event 7' },
-  { id: 8, src: '/images/gallery/image8.jpg', alt: 'CSEA Event 8' },
-  // Add more images here
-];
+export default function GalleryPage({ galleryImages }) {
+    // const isMobile = useIsMobile(); // Removed unused variable
+    const [selectedYear, setSelectedYear] = useState(null);
 
-const GalleryPage = () => {
-  const [currentImage, setCurrentImage] = useState(0);
-  const [showAll, setShowAll] = useState(false);
+    // Group images by academic year
+    const imagesByYear = groupBy(galleryImages, 'academicYear');
+    const years = Object.keys(imagesByYear).sort((a, b) => b.localeCompare(a));
 
-  const nextImage = () => {
-    setCurrentImage((prev) => (prev + 1) % images.length);
-  };
+    // Masonry breakpoints
+    const breakpointColumnsObj = {
+        default: 4,
+        1100: 3,
+        700: 2,
+        500: 1
+    };
 
-  const prevImage = () => {
-    setCurrentImage((prev) => (prev - 1 + images.length) % images.length);
-  };
-
-  return (
-    <>
-      <Head>
-        <title>CSEA - Gallery</title>
-        <meta name="description" content="View photos from CSEA events and activities" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <div className="min-h-screen flex flex-col">
-        <Navbar />
-
-        <main className="flex-grow container mx-auto px-4 py-8 mt-16">
-          <motion.h1
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="text-4xl font-bold text-center mb-8"
-          >
-            CSEA Gallery
-          </motion.h1>
-
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="relative w-full h-96 mb-8"
-          >
-            <Image
-              src={images[currentImage].src}
-              alt={images[currentImage].alt}
-              layout="fill"
-              objectFit="cover"
-              className="rounded-lg"
-            />
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white"
-              onClick={prevImage}
-            >
-              &lt;
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white"
-              onClick={nextImage}
-            >
-              &gt;
-            </Button>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            className="text-center mb-8"
-          >
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button onClick={() => setShowAll(true)}>View More</Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-7xl w-11/12">
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {images.map((image) => (
-                    <div key={image.id} className="relative aspect-square">
-                      <Image
-                        src={image.src}
-                        alt={image.alt}
-                        layout="fill"
-                        objectFit="cover"
-                        className="rounded-lg"
-                      />
+    return (
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+            <div className="min-h-screen flex flex-col">
+                <Head>
+                    <title>CSE Gallery | Moments of Excellence</title>
+                    <meta name="description" content="Gallery of CSE events and memories" />
+                </Head>
+                
+                
+                
+                <main className="flex-grow container mx-auto px-4 py-12">
+                    <div className="flex justify-between items-center mb-8">
+                        <Link href="/" className="button">
+                            Home
+                        </Link>
+                        <h1 className="text-4xl font-bold text-center dark:text-white">
+                            CSE Gallery
+                        </h1>
                     </div>
-                  ))}
-                </div>
-              </DialogContent>
-            </Dialog>
-          </motion.div>
+                    
+                    {/* Year Selector */}
+                    <div className="flex flex-wrap justify-center gap-4 mb-8">
+                        <button 
+                            onClick={() => setSelectedYear(null)}
+                            className={`px-4 py-2 rounded ${selectedYear === null 
+                                ? 'bg-blue-500 text-white' 
+                                : 'bg-gray-200 dark:bg-gray-700 dark:text-white'}`}
+                        >
+                            All Years
+                        </button>
+                        {years.map(year => (
+                            <button
+                                key={year}
+                                onClick={() => setSelectedYear(year)}
+                                className={`px-4 py-2 rounded ${selectedYear === year 
+                                    ? 'bg-blue-500 text-white' 
+                                    : 'bg-gray-200 dark:bg-gray-700 dark:text-white'}`}
+                            >
+                                {year}
+                            </button>
+                        ))}
+                    </div>
 
-          {showAll && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5 }}
-              className="columns-2 md:columns-3 lg:columns-4 gap-4"
-            >
-              {images.map((image) => (
-                <div key={image.id} className="relative mb-4">
-                  <Image
-                    src={image.src}
-                    alt={image.alt}
-                    width={500}
-                    height={500}
-                    layout="responsive"
-                    className="rounded-lg"
-                  />
-                </div>
-              ))}
-            </motion.div>
-          )}
-        </main>
+                    {/* Masonry Gallery */}
+                    <Masonry
+                        breakpointCols={breakpointColumnsObj}
+                        className="my-masonry-grid"
+                        columnClassName="my-masonry-grid_column"
+                    >
+                        {(selectedYear 
+                            ? imagesByYear[selectedYear] 
+                            : galleryImages
+                        ).map((image) => (
+                            <div 
+                                key={image.id} 
+                                className="gallery-item mb-4 hover:scale-105 transition-transform duration-300"
+                            >
+                                <div className="relative w-full aspect-auto rounded-lg overflow-hidden shadow-lg">
+                                    <Image 
+                                        src={image.imageUrl} 
+                                        alt={image.description || 'Gallery Image'} 
+                                        layout="responsive"
+                                        width={image.width || 800}
+                                        height={image.height || 600}
+                                        className="object-cover"
+                                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                    />
+                                </div>
+                                {image.description && (
+                                    <p className="text-sm mt-2 text-center dark:text-gray-300">
+                                        {image.description}
+                                    </p>
+                                )}
+                            </div>
+                        ))}
+                    </Masonry>
+                </main>
+                
+                <Footer />
+            </div>
+        </ThemeProvider>
+    );
+}
 
-        <Footer />
-      </div>
-    </>
-  );
-};
+export async function getServerSideProps() {
+    try {
+        const galleryImages = await getAllGalleryImages();
 
-export default GalleryPage;
+        // Convert Date objects to ISO strings
+        const formattedGalleryImages = galleryImages.map(image => ({
+            ...image,
+            uploadedAt: formatISO(new Date(image.uploadedAt)),
+            createdAt: formatISO(new Date(image.createdAt)),
+            updatedAt: formatISO(new Date(image.updatedAt)), // Ensure updatedAt is also converted
+        }));
 
+        return {
+            props: {
+                galleryImages: formattedGalleryImages,
+            }
+        };
+    } catch (error) {
+        console.error('Error fetching gallery images:', error);
+        return {
+            props: {
+                galleryImages: [],
+                error: 'Failed to fetch gallery images',
+            },
+        };
+    }
+}

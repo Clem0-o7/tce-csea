@@ -102,3 +102,23 @@ body {
 body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
+
+
+.magazine-swiper .swiper-pagination-bullet {
+  background: hsl(var(--primary));
+}
+.magazine-swiper .swiper-pagination-bullet-active {
+  background: hsl(var(--primary-foreground));
+}
+
+.my-masonry-grid {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  margin-left: -30px;
+  width: auto;
+}
+.my-masonry-grid_column {
+  padding-left: 30px;
+  background-clip: padding-box;
+}
