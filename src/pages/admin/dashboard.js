@@ -1,23 +1,26 @@
-import { useEffect } from 'react';
+import { useSession, signOut } from 'next-auth/react';
 import { useRouter } from 'next/router';
-import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import EventsManager from '@/components/admin/EventsManager';
+import GalleryManager from '@/components/admin/GalleryManager';
+import MagazinesManager from '@/components/admin/MagazinesManager';
+import OfficeBearersManager from '@/components/admin/OfficeBearersManager';
 
 export default function AdminDashboard() {
+  const { data: session, status } = useSession();
   const router = useRouter();
 
-  useEffect(() => {
-    // Check if user is logged in
-    const isLoggedIn = document.cookie.includes('adminLoggedIn=true');
-    if (!isLoggedIn) {
-      router.replace('/admin/login');
-    }
-  }, [router]);
+  if (status === 'loading') {
+    return <div>Loading...</div>;
+  }
+
+  if (status === 'unauthenticated') {
+    router.replace('/admin/login');
+    return null;
+  }
 
   const handleLogout = () => {
-    // Remove login cookie
-    document.cookie = 'adminLoggedIn=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-    router.push('/admin/login');
+    signOut({ callbackUrl: '/admin/login' });
   };
 
   return (
@@ -25,12 +28,12 @@ export default function AdminDashboard() {
       <div className="container mx-auto">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-          <Button 
-            variant="destructive" 
+          <button
+            className="px-4 py-2 bg-red-500 text-white rounded"
             onClick={handleLogout}
           >
             Logout
-          </Button>
+          </button>
         </div>
 
         <Tabs defaultValue="events" className="w-full">
@@ -42,16 +45,16 @@ export default function AdminDashboard() {
           </TabsList>
 
           <TabsContent value="events">
-            Events Management
+            <EventsManager />
           </TabsContent>
           <TabsContent value="gallery">
-            Gallery Management
+            <GalleryManager />
           </TabsContent>
           <TabsContent value="magazines">
-            Magazines Management
+            <MagazinesManager />
           </TabsContent>
           <TabsContent value="officeBearers">
-            Office Bearers Management
+            <OfficeBearersManager />
           </TabsContent>
         </Tabs>
       </div>

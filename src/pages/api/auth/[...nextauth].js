@@ -1,46 +1,36 @@
-import NextAuth from "next-auth";
-import CredentialsProvider from "next-auth/providers/credentials";
-import { db } from "@/db/db";
-import { users } from "@/db/schema";
-import { compare } from "bcrypt";
+import NextAuth from 'next-auth';
+import CredentialsProvider from 'next-auth/providers/credentials';
 
 export default NextAuth({
   providers: [
     CredentialsProvider({
-      name: "Credentials",
+      name: 'Credentials',
       credentials: {
-        email: { label: "Email", type: "text" },
-        password: { label: "Password", type: "password" },
+        email: { label: 'Email', type: 'text' },
+        password: { label: 'Password', type: 'password' },
       },
-      async authorize(credentials) {
+      authorize: async (credentials) => {
         const { email, password } = credentials;
 
-        // Fetch user
-        const user = await db
-          .select()
-          .from(users)
-          .where(users.email.equals(email))
-          .execute();
-
-        if (!user.length || !(await compare(password, user[0].passwordHash))) {
-          throw new Error("Invalid email or password");
+        // Replace this with your admin validation logic
+        if (
+          email === process.env.ADMIN_EMAIL &&
+          password === process.env.ADMIN_PASSWORD
+        ) {
+          return { id: 1, name: 'Admin', email };
         }
-
-        return { id: user[0].id, email: user[0].email };
+        return null; // Return null if authentication fails
       },
     }),
   ],
-  secret: process.env.JWT_SECRET,
-  session: { strategy: "jwt" },
+  pages: {
+    signIn: '/admin/login', // Custom login page
+  },
+  secret: process.env.NEXTAUTH_SECRET,
   callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id;
-      }
-      return token;
-    },
     async session({ session, token }) {
-      session.user.id = token.id;
+      // Attach user ID or role to the session if needed
+      session.user.id = token.sub;
       return session;
     },
   },

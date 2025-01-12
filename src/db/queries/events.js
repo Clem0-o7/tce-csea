@@ -1,6 +1,6 @@
-// @/db/queries/events.js
-import { db } from '@/db/db';
-import { events } from '@/db/schema';
+// src/db/queries/events.js
+import { db } from '../db';
+import { events } from '../schema';
 import { eq, and } from 'drizzle-orm';
 
 // Fetch events marked for carousel
@@ -21,7 +21,7 @@ export async function getCarouselEvents() {
       })
       .from(events)
       .where(eq(events.in_carousal, true))
-      .orderBy(events.createdAt);
+      .orderBy(events.date);
 
     return carouselEvents;
   } catch (error) {
@@ -52,25 +52,73 @@ export async function getUpcomingEvents() {
   }
 }
 
-
-
 export async function getAllEvents() {
-  return await db.select().from(events);
+  try {
+    return await db.select().from(events).orderBy(events.date);
+  } catch (error) {
+    console.error('Error fetching all events:', error);
+    return [];
+  }
+}
+
+export async function getEventById(id) {
+  try {
+    const event = await db
+      .select()
+      .from(events)
+      .where(eq(events.id, id))
+      .limit(1);
+
+    return event.length ? event[0] : null;
+  } catch (error) {
+    console.error('Error fetching event by ID:', error);
+    return null;
+  }
+}
+
+export async function createEvent(eventData) {
+  try {
+    return await db.insert(events).values({
+      ...eventData,
+      updatedAt: new Date(),
+    });
+  } catch (error) {
+    console.error('Error creating event:', error);
+    return null;
+  }
 }
 
 export async function addEvent(eventData) {
-  return await db.insert(events).values(eventData).returning();
+  try {
+    return await db.insert(events).values(eventData).returning();
+  } catch (error) {
+    console.error('Error adding event:', error);
+    return null;
+  }
 }
 
 export async function updateEvent(id, eventData) {
-  return await db.update(events)
-    .set(eventData)
-    .where(eq(events.id, id))
-    .returning();
+  try {
+    return await db.update(events)
+      .set({
+        ...eventData,
+        updatedAt: new Date(),
+      })
+      .where(eq(events.id, id))
+      .returning();
+  } catch (error) {
+    console.error('Error updating event:', error);
+    return null;
+  }
 }
 
 export async function deleteEvent(id) {
-  return await db.delete(events)
-    .where(eq(events.id, id))
-    .returning();
+  try {
+    return await db.delete(events)
+      .where(eq(events.id, id))
+      .returning();
+  } catch (error) {
+    console.error('Error deleting event:', error);
+    return null;
+  }
 }
