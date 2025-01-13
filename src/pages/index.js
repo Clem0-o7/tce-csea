@@ -2,42 +2,36 @@ import { useState, useRef, useEffect } from 'react'
 import Head from 'next/head'
 import { motion, useScroll, useTransform } from 'framer-motion'
 import { ThemeProvider } from 'next-themes'
+
+// Components
 import { Navbar } from '@/components/Navbar'
 import Footer from '@/components/Footer'
-
-// Import all section components
 import HomeSection from '@/components/sections/HomeSection'
 import AboutSection from '@/components/sections/AboutSection'
 import WinnersSection from '@/components/sections/WinnersSection'
 import GallerySection from '@/components/sections/GallerySection'
 import EventsSection from '@/components/sections/EventsSection'
-
-// Import the new EventsSection with database query
-import { getCarouselEvents } from '@/db/queries/events'
-
-// Import the new OfficeBearersSection component
 import OfficeBearersSection from '@/components/sections/OfficeBearersSection'
-import { getCurrentOfficeBearers } from '@/db/queries/officeBearers'
-
-// Import the new MagazineSection component
 import { MagazineSection } from '@/components/sections/MagazineSection'
-import { getMagazines } from '@/db/queries/magazines'
 
-// Import the new GallerySection with database query
-import { getCarouselGalleryImages } from '@/db/queries/gallery'
-
-// Import date-fns for date formatting
+// Utilities
 import { formatISO } from 'date-fns'
+import { fetchData } from '@/utils/dataFetching'
+import { useDataManagement } from '@/utils/dataManagement'
 
 export default function Home({ initialData }) {
-  const [activeSection, setActiveSection] = useState('home')
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-  const [data, setData] = useState(initialData)
-  const scrollRef = useRef(null)
-  const { scrollYProgress } = useScroll({
-    container: scrollRef,
-  })
+  const {
+    activeSection,
+    setActiveSection,
+    loading,
+    setLoading,
+    error,
+    setError,
+    data,
+    setData,
+    scrollRef,
+    scrollYProgress,
+  } = useDataManagement(initialData)
 
   // Smooth scroll progress indicator
   const scrollIndicatorWidth = useTransform(
@@ -127,15 +121,10 @@ export default function Home({ initialData }) {
   // Fetch data on client-side if not available
   useEffect(() => {
     if (!initialData) {
-      const fetchData = async () => {
+      const fetchDataAsync = async () => {
         setLoading(true)
         try {
-          const [carouselEvents, officeBearers, magazines, galleryImages] = await Promise.all([
-            getCarouselEvents(),
-            getCurrentOfficeBearers(),
-            getMagazines(),
-            getCarouselGalleryImages(),
-          ])
+          const { carouselEvents, officeBearers, magazines, galleryImages } = await fetchData()
 
           // Convert Date objects to ISO strings
           const formattedGalleryImages = galleryImages.map(image => ({
@@ -159,7 +148,7 @@ export default function Home({ initialData }) {
         }
       }
 
-      fetchData()
+      fetchDataAsync()
     } else {
       setLoading(false)
     }
@@ -228,12 +217,7 @@ export default function Home({ initialData }) {
 // Server-side rendering to fetch carousel events, office bearers, magazines, and gallery images
 export async function getServerSideProps() {
   try {
-    const [carouselEvents, officeBearers, magazines, galleryImages] = await Promise.all([
-      getCarouselEvents(),
-      getCurrentOfficeBearers(),
-      getMagazines(),
-      getCarouselGalleryImages(),
-    ])
+    const { carouselEvents, officeBearers, magazines, galleryImages } = await fetchData()
 
     // Convert Date objects to ISO strings
     const formattedGalleryImages = galleryImages.map(image => ({
