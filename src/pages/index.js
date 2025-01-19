@@ -14,6 +14,12 @@ import EventsSection from '@/components/sections/EventsSection'
 import OfficeBearersSection from '@/components/sections/OfficeBearersSection'
 import { MagazineSection } from '@/components/sections/MagazineSection'
 
+// Database queries
+import { getCarouselEvents } from '@/db/queries/events'
+import { getCurrentOfficeBearers } from '@/db/queries/officeBearers'
+import { getMagazines } from '@/db/queries/magazines'
+import { getCarouselGalleryImages } from '@/db/queries/gallery'
+
 // Utilities
 import { formatISO } from 'date-fns'
 import { fetchData } from '@/utils/dataFetching'
@@ -51,7 +57,7 @@ export default function Home({ initialData }) {
           events={data.carouselEvents} 
           onNextSection={onNextSection} 
         />
-      ) 
+      )
     },
     { 
       id: 'office-bearers', 
@@ -121,10 +127,15 @@ export default function Home({ initialData }) {
   // Fetch data on client-side if not available
   useEffect(() => {
     if (!initialData) {
-      const fetchDataAsync = async () => {
+      const fetchData = async () => {
         setLoading(true)
         try {
-          const { carouselEvents, officeBearers, magazines, galleryImages } = await fetchData()
+          const [carouselEvents, officeBearers, magazines, galleryImages] = await Promise.all([
+            getCarouselEvents(),
+            getCurrentOfficeBearers(),
+            getMagazines(),
+            getCarouselGalleryImages(),
+          ])
 
           // Convert Date objects to ISO strings
           const formattedGalleryImages = galleryImages.map(image => ({
@@ -148,7 +159,7 @@ export default function Home({ initialData }) {
         }
       }
 
-      fetchDataAsync()
+      fetchData()
     } else {
       setLoading(false)
     }
@@ -217,7 +228,12 @@ export default function Home({ initialData }) {
 // Server-side rendering to fetch carousel events, office bearers, magazines, and gallery images
 export async function getServerSideProps() {
   try {
-    const { carouselEvents, officeBearers, magazines, galleryImages } = await fetchData()
+    const [carouselEvents, officeBearers, magazines, galleryImages] = await Promise.all([
+      getCarouselEvents(),
+      getCurrentOfficeBearers(),
+      getMagazines(),
+      getCarouselGalleryImages(),
+    ])
 
     // Convert Date objects to ISO strings
     const formattedGalleryImages = galleryImages.map(image => ({

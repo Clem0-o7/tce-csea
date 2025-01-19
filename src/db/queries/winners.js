@@ -1,6 +1,8 @@
-import { desc, sql, eq } from 'drizzle-orm'; // Ensure eq is imported
+//db/queries/winners.js
+import { desc, sql, eq } from 'drizzle-orm'; 
 import { db } from '@/db/db';
 import { persons, eventWinners, events } from '@/db/schema';
+
 
 export async function getTopWinners(limit = 10, offset = 0) {
   return await db

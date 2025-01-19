@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useTheme } from "next-themes"
 import Image from "next/image"
 import Link from "next/link"
@@ -20,18 +20,8 @@ const navItems = [
 ]
 
 export function Navbar({ activeSection }) {
-  const [isScrolled, setIsScrolled] = useState(false)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const { setTheme, theme } = useTheme()
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10)
-    }
-
-    window.addEventListener("scroll", handleScroll, { passive: true })
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
 
   const handleNavClick = (href) => {
     const element = document.querySelector(href)
@@ -45,11 +35,12 @@ export function Navbar({ activeSection }) {
     <header
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out",
-        isScrolled ? "bg-background/80 backdrop-blur-md shadow-md" : "bg-transparent"
+        "bg-background/80 backdrop-blur-md shadow-md",
+        "p-2" // Reduced padding to make the header thinner
       )}
     >
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between py-4">
+      <div className="container mx-auto px-2">
+        <div className="flex items-center justify-between py-2">
           <NavbarBrand handleNavClick={handleNavClick} />
           <DesktopNav activeSection={activeSection} handleNavClick={handleNavClick} />
           <div className="flex items-center space-x-2">
@@ -67,17 +58,17 @@ function NavbarBrand({ handleNavClick }) {
   return (
     <Link 
       href="#home" 
-      className="flex items-center space-x-3"
+      className="flex items-center space-x-2"
       onClick={() => handleNavClick("#home")}
     >
       <Image
         src="/logo/logo.webp"
         alt="CSEA Logo"
-        width={58}
-        height={58}
+        width={48} // Reduced width
+        height={48} // Reduced height
         className="transition-transform duration-300 ease-in-out hover:scale-110"
       />
-      <span className="font-semibold text-2xl text-foreground">
+      <span className="font-semibold text-xl text-foreground"> 
         CSEA
       </span>
     </Link>
@@ -86,7 +77,7 @@ function NavbarBrand({ handleNavClick }) {
 
 function DesktopNav({ activeSection, handleNavClick }) {
   return (
-    <nav className="hidden md:flex space-x-6">
+    <nav className="hidden md:flex space-x-4"> 
       {navItems.map((item) => (
         <Link
           key={item.href}
@@ -123,13 +114,13 @@ function MobileNav({ isMenuOpen, activeSection, handleNavClick }) {
           exit={{ opacity: 0, y: -20 }}
           className="md:hidden absolute left-0 right-0 top-full bg-background/95 backdrop-blur-md shadow-md"
         >
-          <ul className="flex flex-col items-center space-y-4 py-6">
+          <ul className="flex flex-col items-center space-y-2 py-4"> 
             {navItems.map((item) => (
               <li key={item.href}>
                 <Link
                   href={item.href}
                   className={cn(
-                    "text-foreground/60 hover:text-foreground transition-colors duration-200 text-lg block py-2",
+                    "text-foreground/60 hover:text-foreground transition-colors duration-200 text-lg block py-1", // Reduced padding
                     activeSection === item.href.replace('#', '') && "text-foreground font-semibold"
                   )}
                   onClick={(e) => {
@@ -154,8 +145,6 @@ function MobileMenuToggle({ isMenuOpen, setIsMenuOpen }) {
       size="icon" 
       onClick={() => setIsMenuOpen(!isMenuOpen)} 
       className="md:hidden"
-      //aria-expanded={isMenuOpen}
-      //aria-label="Toggle mobile menu"
     >
       {isMenuOpen ? (
         <X className="h-5 w-5" aria-hidden="true" />
@@ -181,4 +170,3 @@ function ModeToggle() {
     </Button>
   )
 }
-

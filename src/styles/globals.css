@@ -2,7 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -21,8 +20,8 @@ body {
 
 @layer base {
   :root {
-    --background: 0 0% 100%, ;
-    --foreground: 240 10% 3.9%, ;
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
     --card: 0 0% 100%;
     --card-foreground: 240 10% 3.9%;
     --popover: 0 0% 100%;
@@ -102,7 +101,6 @@ body {
 body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
-
 
 .magazine-swiper .swiper-pagination-bullet {
   background: hsl(var(--primary));
