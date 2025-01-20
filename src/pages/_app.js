@@ -1,10 +1,9 @@
-// pages/_app.js
-import { Providers } from './_providers'
-import '@/styles/globals.css'
-import { Inter } from 'next/font/google'
-import { SessionProvider } from 'next-auth/react'
+import { SessionProvider } from 'next-auth/react';
+import { Providers } from './_providers';
+import '@/styles/globals.css';
+import { Inter } from 'next/font/google';
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ subsets: ['latin'] });
 
 function MyApp({ Component, pageProps: { session, ...pageProps } }) {
   return (
@@ -13,7 +12,7 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }) {
         <Component {...pageProps} />
       </Providers>
     </SessionProvider>
-  )
+  );
 }
 
-export default MyApp
+export default MyApp;

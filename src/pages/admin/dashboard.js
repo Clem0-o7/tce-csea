@@ -1,7 +1,7 @@
-// pages/admin/dashboard.js
+//src/pages/admin/dashboard.js:
 import { useEffect, useState } from 'react';
-import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
+import { getSession, useSession } from 'next-auth/react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { Card } from '@/components/ui/card';
 import {
@@ -13,7 +13,7 @@ import {
   BookOpen
 } from 'lucide-react';
 
-export default function Dashboard() {
+export default function AdminDashboard() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [stats, setStats] = useState({
@@ -60,28 +60,47 @@ export default function Dashboard() {
   ];
 
   return (
-    <AdminLayout>
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold">Dashboard</h1>
-        <p className="text-gray-600">Welcome back, {session?.user?.username}</p>
-      </div>
+    <div>
+      <AdminLayout>
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold">Dashboard</h1>
+          <p className="text-gray-600">Welcome back, {session?.user?.username}</p>
+        </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {statCards.map((stat) => {
-          const Icon = stat.icon;
-          return (
-            <Card key={stat.title} className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600">{stat.title}</p>
-                  <p className="text-2xl font-bold">{stat.value}</p>
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {statCards.map((stat) => {
+            const Icon = stat.icon;
+            return (
+              <Card key={stat.title} className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600">{stat.title}</p>
+                    <p className="text-2xl font-bold">{stat.value}</p>
+                  </div>
+                  <Icon className="h-8 w-8 text-gray-400" />
                 </div>
-                <Icon className="h-8 w-8 text-gray-400" />
-              </div>
-            </Card>
-          );
-        })}
-      </div>
-    </AdminLayout>
+              </Card>
+            );
+          })}
+        </div>
+      </AdminLayout>
+    </div>
   );
-};
+}
+
+export async function getServerSideProps(context) {
+  const session = await getSession(context);
+
+  if (!session) {
+    return {
+      redirect: {
+        destination: '/admin/login',
+        permanent: false,
+      },
+    };
+  }
+
+  return {
+    props: { session },
+  };
+}

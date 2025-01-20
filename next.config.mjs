@@ -8,7 +8,12 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'drive.google.com',
-        pathname: '/uc**',
+        pathname: '/uc/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.googleusercontent.com',
+        pathname: '**',
       },
     ],
   },
