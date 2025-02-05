@@ -1,11 +1,10 @@
-// components/admin/AdminLayout.js
-import { useState } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { signOut } from 'next-auth/react';
 import { 
-  LayoutDashboard, 
-  Camera, 
+  LayoutDashboard,
+  Camera,
   Calendar, 
   Trophy, 
   Users, 
@@ -13,14 +12,27 @@ import {
   BookOpen,
   LogOut,
   Menu,
-  X
+  X,
+  ChevronLeft
 } from 'lucide-react';
+import React from 'react';
 
 const AdminLayout = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const router = useRouter();
 
-  const navigation = [
+  useEffect(() => {
+    const savedSidebarState = localStorage.getItem('isSidebarOpen');
+    if (savedSidebarState !== null) {
+      setIsSidebarOpen(JSON.parse(savedSidebarState));
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('isSidebarOpen', JSON.stringify(isSidebarOpen));
+  }, [isSidebarOpen]);
+
+  const navigation = useMemo(() => [
     { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
     { name: 'Events', href: '/admin/events', icon: Calendar },
     { name: 'Gallery', href: '/admin/gallery', icon: Camera },
@@ -28,11 +40,11 @@ const AdminLayout = ({ children }) => {
     { name: 'Office Bearers', href: '/admin/office-bearers', icon: Users },
     { name: 'Contact Messages', href: '/admin/messages', icon: Mail },
     { name: 'Magazine', href: '/admin/magazine', icon: BookOpen },
-  ];
+  ], []);
 
-  const handleSignOut = async () => {
+  const handleSignOut = useMemo(() => async () => {
     await signOut({ redirect: true, callbackUrl: '/admin/login' });
-  };
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -56,8 +68,14 @@ const AdminLayout = ({ children }) => {
       >
         <div className="flex h-full flex-col">
           {/* Sidebar header */}
-          <div className="flex h-16 items-center justify-center border-b">
+          <div className="flex h-16 items-center justify-between border-b px-4">
             <h2 className="text-xl font-bold">Admin Panel</h2>
+            <button
+              className="lg:hidden"
+              onClick={() => setIsSidebarOpen(false)}
+            >
+              <ChevronLeft className="h-6 w-6" />
+            </button>
           </div>
 
           {/* Navigation */}
@@ -111,4 +129,4 @@ const AdminLayout = ({ children }) => {
   );
 };
 
-export default AdminLayout;
+export default React.memo(AdminLayout);

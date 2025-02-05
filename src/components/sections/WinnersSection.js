@@ -17,7 +17,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Trophy, Star } from 'lucide-react';
-// import { useTheme } from 'next-themes';
 import { motion } from 'framer-motion';
 import { useMediaQuery } from '@/hooks/use-media-query';
 
@@ -26,7 +25,6 @@ export default function WinnersSection({ onNextSection }) {
   const [topThree, setTopThree] = useState(null);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
-  // const { theme } = useTheme();
   const isMobile = useMediaQuery('(max-width: 768px)');
 
   useEffect(() => {
@@ -34,10 +32,18 @@ export default function WinnersSection({ onNextSection }) {
       try {
         const winnersResponse = await fetch(`/api/winners?limit=10&offset=${page * 10}`);
         const topThreeResponse = await fetch('/api/top-three-winners');
-        
+  
+        if (!winnersResponse.ok) {
+          throw new Error('Failed to fetch winners data');
+        }
+  
+        if (!topThreeResponse.ok) {
+          throw new Error('Failed to fetch top three data');
+        }
+  
         const winnersData = await winnersResponse.json();
         const topThreeData = await topThreeResponse.json();
-
+  
         if (winnersData.length === 0) {
           setHasMore(false);
         } else {
@@ -45,16 +51,19 @@ export default function WinnersSection({ onNextSection }) {
             setWinners(prev => [...prev, ...winnersData]);
           }
         }
-        
-        setTopThree(topThreeData[0] || null);
+  
+        const uniqueTopThree = Array.from(new Set(topThreeData.map(winner => winner.personId)))
+          .map(id => topThreeData.find(winner => winner.personId === id));
+  
+        setTopThree(uniqueTopThree[0] || null);
       } catch (error) {
         console.error('Failed to fetch winners:', error);
       }
     }
-
+  
     fetchWinners();
   }, [page]);
-
+  
   const loadMore = () => {
     setPage(prev => prev + 1);
   };
@@ -63,7 +72,7 @@ export default function WinnersSection({ onNextSection }) {
     const badgeColors = {
       'first': 'bg-yellow-500 text-white',
       'second': 'bg-gray-400 text-white',
-      'third': 'bg-green text-white'
+      'third': 'bg-green-400 text-white'
     };
 
     const badgeIcons = {
@@ -167,28 +176,28 @@ export default function WinnersSection({ onNextSection }) {
       )}
 
       <div className="text-center mt-12">
-              <Button 
-                onClick={onNextSection}
-                variant="ghost"
-                className="text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <span className="mr-2">Next Section</span>
-                <svg 
-                  xmlns="http://www.w3.org/2000/svg" 
-                  className="h-6 w-6" 
-                  fill="none" 
-                  viewBox="0 0 24 24" 
-                  stroke="currentColor"
-                >
-                  <path 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    strokeWidth={2} 
-                    d="M19 14l-7 7m0 0l-7-7m7 7V3" 
-                  />
-                </svg>
-              </Button>
-            </div>
+        <Button 
+          onClick={onNextSection}
+          variant="ghost"
+          className="text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <span className="mr-2">Next Section</span>
+          <svg 
+            xmlns="http://www.w3.org/2000/svg" 
+            className="h-6 w-6" 
+            fill="none" 
+            viewBox="0 0 24 24" 
+            stroke="currentColor"
+          >
+            <path 
+              strokeLinecap="round" 
+              strokeLinejoin="round" 
+              strokeWidth={2} 
+              d="M19 14l-7 7m0 0l-7-7m7 7V3" 
+            />
+          </svg>
+        </Button>
+      </div>
     </div>
   );
 }

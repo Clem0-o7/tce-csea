@@ -1,12 +1,24 @@
+// filepath: /d:/Projects/tce-csea/src/utils/dataFetching.js
 import { formatISO } from 'date-fns';
 
-export async function fetchData() {
+export async function fetchData(baseUrl) {
   try {
-    const response = await fetch('/api/data'); // Adjust with the actual API endpoint
-    const { carouselEvents, officeBearers, magazines, galleryImages } = await response.json();
+    const [eventsRes, officeBearersRes, magazinesRes, galleryImagesRes] = await Promise.all([
+      fetch(`${baseUrl}/api/events`),
+      fetch(`${baseUrl}/api/officeBearers`),
+      fetch(`${baseUrl}/api/magazines`),
+      fetch(`${baseUrl}/api/gallery`)
+    ]);
+
+    const [eventsData, officeBearersData, magazinesData, galleryImagesData] = await Promise.all([
+      eventsRes.json(),
+      officeBearersRes.json(),
+      magazinesRes.json(),
+      galleryImagesRes.json()
+    ]);
 
     // Convert Date objects to ISO strings
-    const formattedGalleryImages = galleryImages.map((image) => ({
+    const formattedGalleryImages = galleryImagesData.map((image) => ({
       ...image,
       uploadedAt: formatISO(new Date(image.uploadedAt)),
       createdAt: formatISO(new Date(image.createdAt)),
@@ -14,9 +26,9 @@ export async function fetchData() {
     }));
 
     return {
-      carouselEvents,
-      officeBearers,
-      magazines,
+      carouselEvents: eventsData,
+      officeBearers: officeBearersData,
+      magazines: magazinesData,
       galleryImages: formattedGalleryImages,
     };
   } catch (error) {

@@ -24,7 +24,7 @@ export const persons = pgTable('persons', {
   totalEventPoints: integer('total_event_points').default(0),
   socialLinks: jsonb('social_links').default(null),
   createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').defaultNow()  // Manual handling for `updatedAt`
+  updatedAt: timestamp('updated_at').defaultNow()  
 }, (table) => ({
   uniquePersonIdentifier: unique('unique_person_identifier').on(
     table.name, 
@@ -48,21 +48,25 @@ export const events = pgTable('events', {
   teamSizeMax: integer('team_size_max'),
   in_carousal: boolean('in_carousal').default(false),
   createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').defaultNow()  // Manual handling for `updatedAt`
+  updatedAt: timestamp('updated_at').defaultNow()  
 });
 
 // Event Winners Table
+// Event Winners Table
 export const eventWinners = pgTable('event_winners', {
   id: uuid('id').primaryKey().defaultRandom(),
-  eventId: uuid('event_id').references(() => events.id),
-  personId: uuid('person_id').references(() => persons.id),
+  personId: uuid('person_id').references(() => persons.id),  // Track the person who won
   rank: rankEnum('rank'),
   pointsEarned: integer('points_earned'),
-  year: varchar('year', { length: 20 })
+  eventName: varchar('event_name', { length: 255 }),  // Name of the event (no longer related to the events table)
+  eventDate: date('event_date'),  // Event date
+  year: varchar('year', { length: 20 }),
+  isTeam: boolean('is_team').default(false),
+  teamName: varchar('team_name', { length: 255 }),  // Track team name if needed
 }, (table) => ({
-  eventIdIndex: index('event_id_index').on(table.eventId),
   personIdIndex: index('person_id_index').on(table.personId)
 }));
+
 
 // Office Bearers Table
 export const officeBearers = pgTable('office_bearers', {
@@ -84,7 +88,7 @@ export const galleryImages = pgTable('gallery_images', {
   in_carousal: boolean('in_carousal').default(false),
   uploadedAt: timestamp('uploaded_at').defaultNow(),
   createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').defaultNow()  // Manual handling for `updatedAt`
+  updatedAt: timestamp('updated_at').defaultNow()  
 });
 
 // Contact Submissions Table
@@ -117,7 +121,7 @@ export const magazines = pgTable('magazines', {
   thumbnailUrl: text('thumbnail_url').notNull(),
   in_carousal: boolean('in_carousal').default(false),
   createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').defaultNow()  // Manual handling for `updatedAt`
+  updatedAt: timestamp('updated_at').defaultNow()  
 }, (table) => ({
   uniqueMagazineIdentifier: unique('unique_magazine_identifier').on(
     table.name, 
