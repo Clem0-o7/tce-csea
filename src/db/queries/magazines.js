@@ -1,7 +1,7 @@
 import { magazines } from '../schema'
 import { db } from '../db'
 
-export async function getMagazines() {  // Changed function name to match your usage
+export async function getMagazines() {  
   try {
     const magazinesList = await db
       .select({

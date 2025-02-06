@@ -1,17 +1,17 @@
-import { useState, useEffect } from "react"
-import Image from "next/image"
-import { motion } from "framer-motion"
-import { useTheme } from "next-themes"
-import { ChevronDown } from "lucide-react"
-import { HyperText } from "@/components/ui/hyper-text"
+import { useState, useEffect } from "react";
+import Image from "next/image";
+import { motion } from "framer-motion";
+import { useTheme } from "next-themes";
+import { ChevronDown } from "lucide-react";
+import { HyperText } from "@/components/ui/hyper-text";
 
 export default function Home() {
-  const [isLoaded, setIsLoaded] = useState(false)
-  const { theme } = useTheme()
+  const [isLoaded, setIsLoaded] = useState(false);
+  const { theme } = useTheme();
 
   useEffect(() => {
-    setIsLoaded(true)
-  }, [])
+    setIsLoaded(true);
+  }, []);
 
   const logoVariants = {
     animate: {
@@ -22,15 +22,14 @@ export default function Home() {
         repeatType: "reverse",
       },
     },
-  }
+  };
 
   const onNextSection = () => {
-    // Implement scrolling to the next section
     window.scrollTo({
       top: window.innerHeight,
       behavior: "smooth",
-    })
-  }
+    });
+  };
 
   return (
     <div className="relative h-screen w-full overflow-hidden flex items-center justify-center">
@@ -65,11 +64,10 @@ export default function Home() {
 
       <motion.div
         className="absolute bottom-6 left-[48.5%] transform -translate-x-1/2 z-20 cursor-pointer"
-        //whileTap={{ scale: 0.9 }}
         onClick={onNextSection}
       >
         <ChevronDown size={40} className="text-white dark:text-gray-200 animate-bounce" />
       </motion.div>
     </div>
-  )
+  );
 }

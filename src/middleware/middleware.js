@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 
 export default withAuth(
   function middleware(req) {
-    // Exclude login page from middleware
+
     if (req.nextUrl.pathname === '/admin/login') {
       return NextResponse.next();
     }
@@ -22,7 +22,7 @@ export default withAuth(
   {
     callbacks: {
       authorized: ({ token, req }) => {
-        // Allow login page without token
+     
         if (req.nextUrl.pathname === '/admin/login') {
           return true;
         }

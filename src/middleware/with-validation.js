@@ -1,8 +1,7 @@
 import { validateEventData } from '@/utils/validate-event'; 
-import { validateEventWinnerData } from '@/utils/validate-winner'; 
 import { validatePersonData } from '@/utils/validate-person'; 
 
-// Validation middleware specifically for event data
+
 export function withEventValidation(handler) {
   return async (req, res) => {
     if (['POST', 'PUT'].includes(req.method)) {
@@ -20,7 +19,7 @@ export function withEventValidation(handler) {
   };
 }
 
-// Generic validation middleware (used for any kind of validation function)
+
 export function withValidation(validateFn, handler) {
   return async (req, res) => {
     // Check if the request method requires validation

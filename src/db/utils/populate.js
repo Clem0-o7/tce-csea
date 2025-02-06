@@ -2,7 +2,7 @@ import { drizzle } from "drizzle-orm/neon-http";
 import { neon } from "@neondatabase/serverless";
 
 // Directly use the provided database URL
-const sql = neon(NEXT_PUBLIC_DATABASE_URL);
+const sql = neon(DATABASE_URL);
 
 // Initialize drizzle with the connection
 export const db = drizzle({ client: sql });

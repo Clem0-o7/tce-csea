@@ -155,13 +155,13 @@ export default function GalleryPage({ galleryImages }) {
                 top: "50%",
                 left: "50%",
                 transform: "translate(-50%, -50%)",
-                maxWidth: "90vw", // Max width for the modal
-                maxHeight: "90vh", // Max height for the modal
+                maxWidth: "90vw", 
+                maxHeight: "90vh", 
                 width: "auto",
                 height: "auto",
-                paddingTop: "20px", // Padding at the top to ensure the content doesn't get too tight
+                paddingTop: "20px", 
                 paddingBottom: "20px",
-                overflow: "hidden", // Prevent overflow issues
+                overflow: "hidden",
               }}
             >
               {selectedImage && (

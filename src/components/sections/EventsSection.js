@@ -56,10 +56,6 @@ const EventsSection = ({ events = [] }) => {
         <h2 className="font-extrabold text-4xl sm:text-5xl text-gray-800 dark:text-gray-200 tracking-tight">
           Our Events
         </h2>
-       {/* <p className="text-muted-foreground max-w-2xl mx-auto mt-3">
-          Explore the exciting events organized by our Computer Science and Engineering Association.
-        </p>
-        */}
       </motion.div>
 
       <div className="overflow-hidden perspective" ref={emblaRef}>
@@ -149,4 +145,3 @@ const EventsSection = ({ events = [] }) => {
 }
 
 export default EventsSection
-

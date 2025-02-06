@@ -36,13 +36,13 @@ export default function GallerySection({ images, onNextSection }) {
               <div key={image.id} className="mb-6">
                 <div className="relative w-full rounded-lg overflow-hidden">
                   <Link href={`/gallery`}>
-                  <Image
-                    src={image.imageUrl || "/placeholder.svg"}
-                    alt={image.description || "Gallery Image"}
-                    width={image.width || 800}
-                    height={image.height || 600}
-                    className="w-full h-auto object-contain"
-                  />
+                    <Image
+                      src={image.imageUrl || "/placeholder.svg"}
+                      alt={image.description || "Gallery Image"}
+                      width={image.width || 800}
+                      height={image.height || 600}
+                      className="w-full h-auto object-contain"
+                    />
                   </Link>
                 </div>
               </div>

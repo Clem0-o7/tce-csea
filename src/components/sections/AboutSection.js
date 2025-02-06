@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
 import { useSpring, animated, config } from "react-spring";
 import { FaLightbulb, FaUsers, FaStar } from "react-icons/fa";
 
@@ -27,7 +26,7 @@ const AnimatedCard = ({ title, description, icon: Icon }) => {
     boxShadow: isHovered
       ? "0 20px 40px rgba(0, 0, 0, 0.3)"
       : "0 10px 20px rgba(0, 0, 0, 0.1)",
-    config: { tension: 300, friction: 20 }, // Adjusted config for smoother transition
+    config: { tension: 300, friction: 20 },
   });
 
   return (
@@ -50,7 +49,7 @@ const AnimatedCard = ({ title, description, icon: Icon }) => {
 export default function AboutSection() {
   return (
     <section className="container mx-auto px-6 py-20 flex flex-col items-center text-center">
-      <motion.div
+      <div
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: "easeInOut" }}
@@ -59,7 +58,7 @@ export default function AboutSection() {
         <h2 className="font-extrabold text-4xl sm:text-5xl text-gray-800 dark:text-gray-200 tracking-tight">
           About CSEA
         </h2>
-        <motion.p
+        <p
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3, duration: 0.8, ease: "easeInOut" }}
@@ -69,10 +68,10 @@ export default function AboutSection() {
           student-led organization dedicated to fostering innovation,
           professional growth, and collaborative learning. We empower students
           to explore cutting-edge technology and thrive in the tech industry.
-        </motion.p>
-      </motion.div>
+        </p>
+      </div>
 
-      <motion.div
+      <div
         className="grid gap-8 mt-12 sm:grid-cols-2 lg:grid-cols-2 w-full max-w-5xl"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -98,7 +97,7 @@ export default function AboutSection() {
           description="Empower students to succeed in the tech industry."
           icon={FaStar}
         />
-      </motion.div>
+      </div>
     </section>
   );
 }

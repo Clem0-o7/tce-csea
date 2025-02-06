@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, setError } from "react"
 import Head from "next/head"
 import { motion } from "framer-motion"
 
@@ -8,7 +8,7 @@ import { motion } from "framer-motion"
 import { Navbar } from "@/components/Navbar"
 import Footer from "@/components/Footer"
 import { AuroraBackground } from "@/components/ui/aurora-background"
-import GlobalLoading from "@/components/GlobalLoading"  // Import global loading screen
+import GlobalLoading from "@/components/GlobalLoading"
 
 // Sections configuration
 import sections from "@/config/sectionsConfig"
@@ -16,14 +16,13 @@ import sections from "@/config/sectionsConfig"
 // Utilities
 import { fetchData } from "@/utils/dataFetching"
 import { useDataManagement } from "@/utils/dataManagement"
-import { useLoading } from "@/contexts/LoadingContext" // Import global loading state
+import { useLoading } from "@/contexts/LoadingContext" 
 
 export default function Home({ initialData }) {
   const { activeSection, setActiveSection, error, setError, data, setData } =
     useDataManagement(initialData)
 
-  const { setIsLoading } = useLoading() // Global loading state
-
+  const { setIsLoading } = useLoading() 
   // Function to scroll to the next section
   const scrollToNextSection = () => {
     const currentIndex = sections.findIndex((section) => section.id === activeSection)
@@ -60,7 +59,7 @@ export default function Home({ initialData }) {
   useEffect(() => {
     if (!initialData) {
       const fetchDataAsync = async () => {
-        setIsLoading(true) // Trigger global loading screen
+        setIsLoading(true) 
         try {
           const data = await fetchData(process.env.NEXT_PUBLIC_BASE_URL)
           setData(data)
@@ -68,13 +67,13 @@ export default function Home({ initialData }) {
           console.error("Error fetching data:", error)
           setError("Failed to fetch data")
         } finally {
-          setIsLoading(false) // Hide global loading screen
+          setIsLoading(false) 
         }
       }
 
       fetchDataAsync()
     }
-  }, [initialData, setData, setIsLoading]) // Added setIsLoading to dependencies
+  }, [initialData, setData, setIsLoading]) 
 
   if (error) {
     return <div>{error}</div>
@@ -147,7 +146,7 @@ export default function Home({ initialData }) {
   )
 }
 
-// Server-side data fetching remains the same
+// Server-side data fetching 
 export async function getServerSideProps() {
   try {
     const data = await fetchData(process.env.NEXT_PUBLIC_BASE_URL)

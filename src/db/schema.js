@@ -4,7 +4,6 @@ import { relations } from 'drizzle-orm';
 
 // Enum definitions
 export const eventStatusEnum = pgEnum('event_status', ['upcoming', 'ongoing', 'completed']);
-export const rankEnum = pgEnum('rank', ['first', 'second', 'third']);
 export const adminRoleEnum = pgEnum('admin_role', ['super_admin', 'editor', 'viewer']);
 export const submissionStatusEnum = pgEnum('submission_status', ['unread', 'read', 'resolved']);
 
@@ -114,9 +113,7 @@ export const personRelations = relations(persons, ({ many }) => ({
   officeBearers: many(officeBearers)
 }));
 
-export const eventRelations = relations(events, ({ many }) => ({
-  // winners: many(eventWinners)
-}));
+
 
 export const officeBearersRelations = relations(officeBearers, ({ one }) => ({
   person: one(persons, {
