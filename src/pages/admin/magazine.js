@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/router';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,7 +12,9 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ExternalLink, FileText, Pencil, Trash2 } from 'lucide-react';
 
 export default function MagazineAdminPage() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  
   const [magazines, setMagazines] = useState([]);
   const [isEditMode, setIsEditMode] = useState(false);
   const [currentMagazine, setCurrentMagazine] = useState(null);
@@ -26,16 +29,34 @@ export default function MagazineAdminPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
+  // Check session status and handle redirection or fetching data
   useEffect(() => {
-    fetchMagazines();
-  }, []);
+    // Wait until session status is determined
+    if (status === 'loading') return;
 
+    // If not authenticated, redirect to the login page
+    if (status === 'unauthenticated') {
+      router.replace('/admin/login');
+      return;
+    }
+
+    // If authenticated, fetch magazines
+    if (status === 'authenticated') {
+      fetchMagazines();
+    }
+  }, [status, router]);
+
+  // Function to fetch magazines
   const fetchMagazines = async () => {
     try {
       const response = await fetch('/api/admin/magazines');
+      if (!response.ok) {
+        throw new Error('Failed to fetch magazines');
+      }
       const data = await response.json();
       setMagazines(Array.isArray(data) ? data : []);
-    } catch (error) {
+    } catch (err) {
+      console.error('Error fetching magazines:', err);
       setError('Failed to fetch magazines');
     }
   };

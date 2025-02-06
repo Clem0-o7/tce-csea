@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
 import { useSession } from 'next-auth/react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -9,8 +10,11 @@ import { Switch } from '@/components/ui/switch';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ExternalLink, Pencil, Trash2 } from 'lucide-react';
 
+
 export default function OfficeBearersAdminPage() {
   const { data: session, status } = useSession();
+  const router = useRouter();
+
   const [officeBearers, setOfficeBearers] = useState([]);
   const [isEditMode, setIsEditMode] = useState(false);
   const [currentBearer, setCurrentBearer] = useState(null);
@@ -35,25 +39,26 @@ export default function OfficeBearersAdminPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
+  // Authentication check: wait for status, then fetch office bearers if authenticated
   useEffect(() => {
+    if (status === 'loading') return; // Wait for session to be determined
+
+    if (status === 'unauthenticated') {
+      router.replace('/admin/login');
+      return;
+    }
+
     if (status === 'authenticated') {
       fetchOfficeBearers();
     }
-  }, [status]);
-
-  const convertGDriveLink = (url) => {
-    if (!url || !url.includes('drive.google.com')) return url;
-    
-    const fileId = url.match(/[-\w]{25,}/);
-    if (!fileId) return url;
-    
-    return `https://drive.google.com/uc?export=view&id=${fileId[0]}`;
-  };
+  }, [status, router]);
 
   const fetchOfficeBearers = async () => {
     try {
       const response = await fetch('/api/admin/office-bearers');
-      if (!response.ok) throw new Error('Failed to fetch office bearers');
+      if (!response.ok) {
+        throw new Error('Failed to fetch office bearers');
+      }
       const data = await response.json();
       
       // Format the dates for display
@@ -65,10 +70,21 @@ export default function OfficeBearersAdminPage() {
       
       setOfficeBearers(formattedData);
     } catch (error) {
+      console.error('Error fetching office bearers:', error);
       setError('Failed to fetch office bearers');
     }
   };
 
+  const convertGDriveLink = (url) => {
+    if (!url || !url.includes('drive.google.com')) return url;
+    
+    const fileId = url.match(/[-\w]{25,}/);
+    if (!fileId) return url;
+    
+    return `https://drive.google.com/uc?export=view&id=${fileId[0]}`;
+  };
+
+  
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     if (name.startsWith('social.')) {
@@ -84,6 +100,8 @@ export default function OfficeBearersAdminPage() {
       setFormData(prev => ({ ...prev, [name]: value }));
     }
   };
+
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();

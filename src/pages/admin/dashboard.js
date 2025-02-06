@@ -26,12 +26,42 @@ export default function AdminDashboard() {
   const [localSession, setLocalSession] = useState(null);
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/admin/login');
-    } else if (status === 'authenticated' && !localSession) {
+    console.log("Session Status:", status);
+    console.log("Session Data:", session);
+
+    // Wait for NextAuth to finish loading before making any redirection decisions
+    if (status === "loading") return;
+
+    // If user is unauthenticated, redirect them to login page
+    if (status === "unauthenticated") {
+      console.log("Redirecting to /admin/login...");
+      router.replace("/admin/login");
+      return;
+    }
+
+    // If user is authenticated but local session is not set, store it
+    if (status === "authenticated" && !localSession) {
+      console.log("Storing session locally");
       setLocalSession(session);
     }
   }, [status, router, session, localSession]);
+
+  useEffect(() => {
+    // Fetch dashboard stats only when session is confirmed
+    if (status !== "authenticated") return;
+
+    const fetchStats = async () => {
+      try {
+        const response = await fetch('/api/admin/dashboard-stats');
+        const data = await response.json();
+        setStats(data);
+      } catch (error) {
+        console.error('Error fetching dashboard stats:', error);
+      }
+    };
+
+    fetchStats();
+  }, [status]);
 
   useEffect(() => {
     // Fetch dashboard stats

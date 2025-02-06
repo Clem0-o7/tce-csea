@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
+import {useRouter} from 'next/router';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,9 +12,9 @@ import { Switch } from '@/components/ui/switch';
 import Image from 'next/image';
 import { Camera, Pencil, Trash2, ExternalLink } from 'lucide-react';
 import { format } from 'date-fns';
-
 export default function GalleryAdminPage() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
+  const router = useRouter();
   const [images, setImages] = useState([]);
   const [isEditMode, setIsEditMode] = useState(false);
   const [currentImage, setCurrentImage] = useState(null);
@@ -28,19 +29,36 @@ export default function GalleryAdminPage() {
   const [success, setSuccess] = useState('');
   const [tagInput, setTagInput] = useState('');
 
+  // Authentication check: redirect to login if not authenticated.
   useEffect(() => {
-    fetchImages();
-  }, []);
+    if (status === 'loading') return; // Wait for session to load
 
+    if (status === 'unauthenticated') {
+      router.replace('/admin/login');
+      return;
+    }
+
+    // If authenticated, fetch the images.
+    if (status === 'authenticated') {
+      fetchImages();
+    }
+  }, [status, router]);
+
+  // Fetch images function
   const fetchImages = async () => {
     try {
       const response = await fetch('/api/admin/gallery');
+      if (!response.ok) {
+        throw new Error('Failed to fetch images');
+      }
       const data = await response.json();
       setImages(data);
     } catch (error) {
+      console.error('Error fetching images:', error);
       setError('Failed to fetch images');
     }
   };
+
 
   const convertGDriveLink = (url) => {
     if (!url.includes('drive.google.com')) return url;
@@ -294,6 +312,7 @@ export default function GalleryAdminPage() {
                       alt={image.description || 'Gallery image'}
                       fill
                       className="object-cover"
+                      priority={false}
                     />
                   </div>
                   <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center space-x-2">

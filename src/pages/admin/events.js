@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import {useRouter} from 'next/router';
 import { useSession } from 'next-auth/react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -17,6 +18,7 @@ import { Switch } from '@/components/ui/switch';
 
 export default function EventsAdminPage() {
   const { data: session, status } = useSession();
+  const router = useRouter();
   const [events, setEvents] = useState([]);
   const [isEditMode, setIsEditMode] = useState(false);
   const [currentEvent, setCurrentEvent] = useState(null);
@@ -36,21 +38,39 @@ export default function EventsAdminPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
+  // Redirect or fetch events based on authentication status
   useEffect(() => {
+    // Wait until NextAuth finishes loading
+    if (status === 'loading') return;
+
+    // If unauthenticated, redirect to login
+    if (status === 'unauthenticated') {
+      router.replace('/admin/login');
+      return;
+    }
+
+    // If authenticated, fetch events
     if (status === 'authenticated') {
       fetchEvents();
     }
-  }, [status]);
+  }, [status, router]);
 
+  // Function to fetch events from the API
   const fetchEvents = async () => {
     try {
       const response = await fetch('/api/admin/events');
+      if (!response.ok) {
+        throw new Error('Failed to fetch events');
+      }
       const data = await response.json();
       setEvents(data);
     } catch (error) {
-      setError('Failed to fetch events');
+      console.error('Error fetching events:', error);
+      setError('Error fetching events');
     }
   };
+
+  
 
   const convertGDriveLink = (url) => {
     if (!url.includes('drive.google.com')) return url;

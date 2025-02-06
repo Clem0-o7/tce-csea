@@ -7,10 +7,13 @@ export default function Admin() {
   const router = useRouter();
 
   useEffect(() => {
+    // Wait until the session status is known
+    if (status === 'loading') return;
+
     if (status === 'authenticated') {
-      router.push('/admin/dashboard');
+      router.replace('/admin/dashboard');
     } else if (status === 'unauthenticated') {
-      router.push('/admin/login');
+      router.replace('/admin/login');
     }
   }, [status, router]);
 

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
 import { useSession } from 'next-auth/react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -8,22 +9,41 @@ import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { Mail, CheckCircle, XCircle } from 'lucide-react';
 
+
 export default function ContactMessagesAdminPage() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  
   const [messages, setMessages] = useState([]);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
   useEffect(() => {
-    fetchMessages();
-  }, []);
+    // Wait for the session status to be determined
+    if (status === 'loading') return;
+    
+    // Redirect to login if unauthenticated
+    if (status === 'unauthenticated') {
+      router.replace('/admin/login');
+      return;
+    }
+
+    // If authenticated, fetch messages
+    if (status === 'authenticated') {
+      fetchMessages();
+    }
+  }, [status, router]);
 
   const fetchMessages = async () => {
     try {
       const response = await fetch('/api/admin/contact');
+      if (!response.ok) {
+        throw new Error('Failed to fetch messages');
+      }
       const data = await response.json();
-      setMessages(data);
-    } catch (error) {
+      setMessages(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error('Error fetching messages:', err);
       setError('Failed to fetch messages');
     }
   };
