@@ -34,7 +34,7 @@ export default function MagazineAdminPage() {
     try {
       const response = await fetch('/api/admin/magazines');
       const data = await response.json();
-      setMagazines(data);
+      setMagazines(Array.isArray(data) ? data : []);
     } catch (error) {
       setError('Failed to fetch magazines');
     }
