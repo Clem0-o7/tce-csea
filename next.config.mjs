@@ -17,6 +17,19 @@ const nextConfig = {
       },
     ],
   },
+  async headers() {
+    return [
+      {
+        source: '/api/auth/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'no-store, max-age=0' },
+          { key: 'Content-Type', value: 'application/json' },
+        ],
+      },
+    ];
+  },
 };
+
+
 
 export default nextConfig;

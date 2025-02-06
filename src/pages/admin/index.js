@@ -1,3 +1,4 @@
+// @/admin/index.js
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useSession } from 'next-auth/react';
@@ -7,15 +8,26 @@ export default function Admin() {
   const router = useRouter();
 
   useEffect(() => {
-    // Wait until the session status is known
     if (status === 'loading') return;
 
-    if (status === 'authenticated') {
-      router.replace('/admin/dashboard');
-    } else if (status === 'unauthenticated') {
-      router.replace('/admin/login');
-    }
+    const redirect = async () => {
+      try {
+        if (status === 'authenticated') {
+          await router.replace('/admin/dashboard');
+        } else {
+          await router.replace('/admin/login');
+        }
+      } catch (error) {
+        console.error('Navigation error:', error);
+      }
+    };
+
+    redirect();
   }, [status, router]);
 
-  return <div>Loading...</div>;
+  return (
+    <div className="flex items-center justify-center min-h-screen">
+      <div>Loading...</div>
+    </div>
+  );
 }

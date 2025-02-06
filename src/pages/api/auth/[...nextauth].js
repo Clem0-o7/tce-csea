@@ -1,3 +1,5 @@
+//@/pages/api/auth/[...nextauth].js
+
 import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { db } from '@/db/db';
@@ -78,23 +80,23 @@ export const authOptions = {
       return session;
     },
   },
-  session: {
-    strategy: 'jwt', 
-    maxAge: 24 * 60 * 60, // (1 day)
-  },
   cookies: {
     sessionToken: {
-      name: `next-auth.session-token`, 
+      name: `${process.env.NODE_ENV === 'production' ? '__Secure-' : ''}next-auth.session-token`,
       options: {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production', 
-        sameSite: 'lax', 
+        sameSite: 'lax',
         path: '/',
-      },
-    },
+        secure: process.env.NODE_ENV === 'production',
+        domain: process.env.NODE_ENV === 'production' ? '.vercel.app' : undefined
+      }
+    }
   },
-  debug: process.env.NODE_ENV === 'development',
-  secret: process.env.NEXTAUTH_SECRET, 
+  // Add these for better security
+  session: {
+    strategy: 'jwt',
+    maxAge: 24 * 60 * 60,
+  },
 };
 
 export default NextAuth(authOptions);
