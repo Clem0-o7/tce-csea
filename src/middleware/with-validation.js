@@ -40,22 +40,7 @@ export function withValidation(validateFn, handler) {
 }
 
 // Add new logic to handle specific validation needs for event winners
-export function withEventWinnerValidation(handler) {
-  return async (req, res) => {
-    if (['POST', 'PUT'].includes(req.method)) {
-      const { isValid, errors } = validateEventWinnerData(req.body); // validate event winner data
-      
-      if (!isValid) {
-        return res.status(400).json({
-          error: 'Invalid event winner data',
-          details: errors,
-        });
-      }
-    }
-    
-    return handler(req, res);
-  };
-}
+
 
 // Add another middleware for person validation (if needed for winner creation or other tasks)
 export function withPersonValidation(handler) {
