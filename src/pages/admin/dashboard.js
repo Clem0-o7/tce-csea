@@ -1,4 +1,3 @@
-//src/pages/admin/dashboard.js:
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { getSession, useSession } from 'next-auth/react';
@@ -24,12 +23,15 @@ export default function AdminDashboard() {
     messages: 0,
     magazines: 0
   });
+  const [localSession, setLocalSession] = useState(null);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/admin/login');
+    } else if (status === 'authenticated' && !localSession) {
+      setLocalSession(session);
     }
-  }, [status, router]);
+  }, [status, router, session, localSession]);
 
   useEffect(() => {
     // Fetch dashboard stats
@@ -53,7 +55,6 @@ export default function AdminDashboard() {
   const statCards = [
     { title: 'Total Events', value: stats.events, icon: CalendarDays },
     { title: 'Gallery Images', value: stats.gallery, icon: Image },
-    { title: 'Event Winners', value: stats.winners, icon: Trophy },
     { title: 'Office Bearers', value: stats.officeBearers, icon: Users },
     { title: 'Unread Messages', value: stats.messages, icon: MessageSquare },
     { title: 'Magazines', value: stats.magazines, icon: BookOpen }
@@ -64,7 +65,7 @@ export default function AdminDashboard() {
       <AdminLayout>
         <div className="mb-6">
           <h1 className="text-3xl font-bold">Dashboard</h1>
-          <p className="text-gray-600">Welcome back, {session?.user?.username}</p>
+          <p className="text-gray-600">Welcome back, {localSession?.user?.username}</p>
         </div>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">

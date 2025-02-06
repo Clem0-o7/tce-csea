@@ -1,59 +1,77 @@
+'use client';
+
 import React, { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { Linkedin, GitlabIcon as GitHub, Globe, Instagram } from 'lucide-react';
+import { Globe } from 'lucide-react';
+import { SiLinkedin, SiGithub, SiInstagram } from 'react-icons/si';
 import { useTheme } from 'next-themes';
-import { Button } from '@/components/ui/button';
 import { useMediaQuery } from '@/hooks/use-media-query';
 
 // Social icon mapping
 const socialIcons = {
-  linkedin: Linkedin,
-  github: GitHub,
+  linkedin: SiLinkedin,
+  github: SiGithub,
   website: Globe,
-  instagram: Instagram,
+  instagram: SiInstagram,
 };
 
-const OfficeBearersSection = ({ officeBearers = [], onNextSection }) => {
+const OfficeBearersSection = ({ officeBearers = [] }) => {
   const [hoveredCard, setHoveredCard] = useState(null);
   const { theme } = useTheme();
   const isMobile = useMediaQuery('(max-width: 768px)');
-  const scrollRef = useRef(null);
+  const scrollRefTop = useRef(null);
+  const scrollRefBottom = useRef(null);
   const startX = useRef(0);
   const scrollLeft = useRef(0);
 
   useEffect(() => {
-    const handleTouchStart = (e) => {
-      startX.current = e.touches[0].pageX - scrollRef.current.offsetLeft;
-      scrollLeft.current = scrollRef.current.scrollLeft;
-    };
-
-    const handleTouchMove = (e) => {
-      const x = e.touches[0].pageX - scrollRef.current.offsetLeft;
-      const walk = (x - startX.current) * 2; // Adjust the multiplier for sensitivity
-      scrollRef.current.scrollLeft = scrollLeft.current - walk;
-    };
-
-    const scrollContainer = scrollRef.current;
-    if (scrollContainer) {
-      scrollContainer.addEventListener('touchstart', handleTouchStart);
-      scrollContainer.addEventListener('touchmove', handleTouchMove);
-    }
-
-    return () => {
-      if (scrollContainer) {
-        scrollContainer.removeEventListener('touchstart', handleTouchStart);
-        scrollContainer.removeEventListener('touchmove', handleTouchMove);
+    const handleTouchStart = (e, ref) => {
+      if (ref.current) {
+        startX.current = e.touches[0].pageX - ref.current.offsetLeft;
+        scrollLeft.current = ref.current.scrollLeft;
       }
     };
+
+    const handleTouchMove = (e, ref) => {
+      if (ref.current) {
+        const x = e.touches[0].pageX - ref.current.offsetLeft;
+        const walk = (x - startX.current) * 2; // Adjust the multiplier for sensitivity
+        ref.current.scrollLeft = scrollLeft.current - walk;
+      }
+    };
+
+    const scrollContainers = [scrollRefTop.current, scrollRefBottom.current];
+    scrollContainers.forEach((scrollContainer) => {
+      if (scrollContainer) {
+        scrollContainer.addEventListener('touchstart', (e) => handleTouchStart(e, scrollContainer));
+        scrollContainer.addEventListener('touchmove', (e) => handleTouchMove(e, scrollContainer));
+      }
+    });
+
+    return () => {
+      scrollContainers.forEach((scrollContainer) => {
+        if (scrollContainer) {
+          scrollContainer.removeEventListener('touchstart', (e) => handleTouchStart(e, scrollContainer));
+          scrollContainer.removeEventListener('touchmove', (e) => handleTouchMove(e, scrollContainer));
+        }
+      });
+    };
   }, []);
+
+  // Split office bearers by batch
+  const sortedBearers = [...officeBearers].sort((a, b) => a.batch - b.batch);
+
+  const midIndex = Math.ceil(sortedBearers.length / 2);
+  const olderBatch = sortedBearers.slice(0, midIndex);
+  const newerBatch = sortedBearers.slice(midIndex);
 
   // Render social links dynamically
   const renderSocialLinks = (socialLinks) => {
     if (!socialLinks) return null;
 
     return Object.entries(socialLinks)
-      .filter(([platform]) => platform in socialIcons)
+      .filter(([platform, link]) => platform in socialIcons && link)
       .slice(0, 3)
       .map(([platform, link]) => {
         const Icon = socialIcons[platform];
@@ -75,87 +93,69 @@ const OfficeBearersSection = ({ officeBearers = [], onNextSection }) => {
       });
   };
 
+  const renderBearers = (bearers) => (
+    <div
+      className={`flex space-x-4 md:space-x-8 overflow-x-auto pb-4 snap-x snap-mandatory ${
+        isMobile ? 'snap-center' : ''
+      }`}
+      style={{ scrollBehavior: 'smooth' }}
+    >
+      {bearers.map((bearer) => (
+        <motion.div
+          key={bearer.id}
+          className={`flex-shrink-0 w-[150px] md:w-[200px] p-2 rounded-lg transition-all duration-300 snap-center ${
+            hoveredCard === bearer.id ? 'scale-105 shadow-xl' : 'scale-100 shadow-md'
+          } ${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-black'}`}
+          onHoverStart={() => setHoveredCard(bearer.id)}
+          onHoverEnd={() => setHoveredCard(null)}
+          whileHover={{ scale: 1.05 }}
+        >
+          <div className="relative w-32 h-32 md:w-40 md:h-40 mx-auto mb-4 rounded-full overflow-hidden">
+            <Image
+              src={bearer.profileImage || '/default-avatar.png'}
+              alt={bearer.name}
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            />
+          </div>
+
+          <h3 className="text-sm md:text-lg font-semibold">{bearer.name}</h3>
+          <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400">{bearer.position}</p>
+          <p className="text-xs text-gray-500 dark:text-gray-500 mb-2">
+            {bearer.department} | Batch {bearer.batch}
+          </p>
+
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: hoveredCard === bearer.id ? 1 : 0 }}
+            className="flex justify-center space-x-4 mt-2 h-6"
+          >
+            {renderSocialLinks(bearer.socialLinks)}
+          </motion.div>
+        </motion.div>
+      ))}
+    </div>
+  );
+
   return (
     <section
       id="office-bearers"
       className="relative min-h-screen flex flex-col justify-center items-center overflow-hidden py-16"
     >
       <div className="container mx-auto px-4 text-center">
-        <h2 className="text-3xl md:text-4xl font-bold mb-8">
+        <h2 className="text-3xl md:text-4xl font-bold mb-8 text-gray-800 dark:text-gray-200">
           Our Office Bearers
         </h2>
 
-        <div className="relative w-full">
-          <div
-            ref={scrollRef}
-            className={`flex space-x-4 md:space-x-8 overflow-x-auto pb-4 snap-x snap-mandatory ${
-              isMobile ? 'snap-center' : ''
-            }`}
-            style={{ scrollBehavior: 'smooth' }}
-          >
-            {officeBearers.map((bearer) => (
-              <motion.div
-                key={bearer.id}
-                className={`flex-shrink-0 ${
-                  isMobile ? 'w-full' : 'w-[250px]'
-                } p-4 rounded-lg transition-all duration-300 snap-center ${
-                  hoveredCard === bearer.id ? 'scale-105 shadow-xl' : 'scale-100 shadow-md'
-                } ${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-black'}`}
-                onHoverStart={() => setHoveredCard(bearer.id)}
-                onHoverEnd={() => setHoveredCard(null)}
-                whileHover={{ scale: 1.05 }}
-              >
-                <div className="relative w-56 h-56 mx-auto mb-4 rounded-full overflow-hidden">
-                  <Image
-                    src={bearer.profileImage || '/default-avatar.png'}
-                    alt={bearer.name}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                  />
-                </div>
-
-                <h3 className="text-xl font-semibold">{bearer.name}</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">{bearer.position}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-500 mb-2">
-                  {bearer.department} | Batch {bearer.batch}
-                </p>
-
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: hoveredCard === bearer.id ? 1 : 0 }}
-                  className="flex justify-center space-x-4 mt-2 h-6"
-                >
-                  {renderSocialLinks(bearer.socialLinks)}
-                </motion.div>
-              </motion.div>
-            ))}
+        <div className="relative w-full space-y-8">
+          <div ref={scrollRefTop}>
+            {renderBearers(olderBatch)}
+          </div>
+          <div ref={scrollRefBottom}>
+            {renderBearers(newerBatch)}
           </div>
         </div>
-      </div>
-
-      <div className="text-center mt-12">
-        <Button 
-          onClick={onNextSection}
-          variant="ghost"
-          className="text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <span className="mr-2">Next Section</span>
-          <svg 
-            xmlns="http://www.w3.org/2000/svg" 
-            className="h-6 w-6" 
-            fill="none" 
-            viewBox="0 0 24 24" 
-            stroke="currentColor"
-          >
-            <path 
-              strokeLinecap="round" 
-              strokeLinejoin="round" 
-              strokeWidth={2} 
-              d="M19 14l-7 7m0 0l-7-7m7 7V3" 
-            />
-          </svg>
-        </Button>
       </div>
     </section>
   );

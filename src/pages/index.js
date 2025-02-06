@@ -1,51 +1,39 @@
-// filepath: /D:/Projects/tce-csea/src/pages/index.js
-import { useState, useRef, useEffect } from 'react';
-import Head from 'next/head';
-import { motion, useScroll, useTransform } from 'framer-motion';
-import { ThemeProvider } from 'next-themes';
+"use client"
+
+import { useEffect } from "react"
+import Head from "next/head"
+import { motion } from "framer-motion"
 
 // Components
-import { Navbar } from '@/components/Navbar';
-import Footer from '@/components/Footer';
+import { Navbar } from "@/components/Navbar"
+import Footer from "@/components/Footer"
+import { AuroraBackground } from "@/components/ui/aurora-background"
+import GlobalLoading from "@/components/GlobalLoading"  // Import global loading screen
 
 // Sections configuration
-import sections from '@/config/sectionsConfig';
+import sections from "@/config/sectionsConfig"
 
 // Utilities
-import { fetchData } from '@/utils/dataFetching';
-import { useDataManagement } from '@/utils/dataManagement';
+import { fetchData } from "@/utils/dataFetching"
+import { useDataManagement } from "@/utils/dataManagement"
+import { useLoading } from "@/contexts/LoadingContext" // Import global loading state
 
 export default function Home({ initialData }) {
-  const {
-    activeSection,
-    setActiveSection,
-    loading,
-    setLoading,
-    error,
-    setError,
-    data,
-    setData,
-    scrollRef,
-    scrollYProgress,
-  } = useDataManagement(initialData);
+  const { activeSection, setActiveSection, error, setError, data, setData } =
+    useDataManagement(initialData)
 
-  // Smooth scroll progress indicator
-  const scrollIndicatorWidth = useTransform(
-    scrollYProgress, 
-    [0, 1], 
-    ['0%', '100%']
-  );
+  const { setIsLoading } = useLoading() // Global loading state
 
   // Function to scroll to the next section
   const scrollToNextSection = () => {
-    const currentIndex = sections.findIndex(section => section.id === activeSection);
-    const nextIndex = (currentIndex + 1) % sections.length;
-    const nextSectionId = sections[nextIndex].id;
-    const nextSection = document.getElementById(nextSectionId);
+    const currentIndex = sections.findIndex((section) => section.id === activeSection)
+    const nextIndex = (currentIndex + 1) % sections.length
+    const nextSectionId = sections[nextIndex].id
+    const nextSection = document.getElementById(nextSectionId)
     if (nextSection) {
-      nextSection.scrollIntoView({ behavior: 'smooth' });
+      nextSection.scrollIntoView({ behavior: "smooth" })
     }
-  };
+  }
 
   // Intersection Observer for active section tracking
   useEffect(() => {
@@ -53,122 +41,128 @@ export default function Home({ initialData }) {
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            setActiveSection(entry.target.id);
+            setActiveSection(entry.target.id)
           }
-        });
+        })
       },
-      { 
-        threshold: 0.5, 
-        root: scrollRef.current 
-      }
-    );
+      { threshold: 0.5 },
+    )
 
-    const sectionElements = document.querySelectorAll('section');
-    sectionElements.forEach((section) => observer.observe(section));
+    const sectionElements = document.querySelectorAll("section")
+    sectionElements.forEach((section) => observer.observe(section))
 
     return () => {
-      sectionElements.forEach((section) => observer.unobserve(section));
-    };
-  }, [scrollRef, setActiveSection]);
+      sectionElements.forEach((section) => observer.unobserve(section))
+    }
+  }, [setActiveSection])
 
   // Fetch data on client-side if not available
   useEffect(() => {
     if (!initialData) {
       const fetchDataAsync = async () => {
-        setLoading(true);
+        setIsLoading(true) // Trigger global loading screen
         try {
-          const data = await fetchData(process.env.NEXT_PUBLIC_BASE_URL);
-          setData(data);
-          setLoading(false);
+          const data = await fetchData(process.env.NEXT_PUBLIC_BASE_URL)
+          setData(data)
         } catch (error) {
-          console.error('Error fetching data:', error);
-          setError('Failed to fetch data');
-          setLoading(false);
+          console.error("Error fetching data:", error)
+          setError("Failed to fetch data")
+        } finally {
+          setIsLoading(false) // Hide global loading screen
         }
-      };
+      }
 
-      fetchDataAsync();
-    } else {
-      setLoading(false);
+      fetchDataAsync()
     }
-  }, [initialData]);
-
-  if (loading) {
-    return <div>Loading...</div>;
-  }
+  }, [initialData, setData, setIsLoading]) // Added setIsLoading to dependencies
 
   if (error) {
-    return <div>{error}</div>;
+    return <div>{error}</div>
   }
 
   return (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-      <div className="relative">
-        <Head>
-          <title>CSEA - Computer Science and Engineering Association</title>
-          <meta name="description" content="Empowering future tech leaders through innovation, collaboration, and excellence." />
-          <link rel="icon" href="/logo/logo.webp" />
-        </Head>
-
-        <Navbar activeSection={activeSection} />
-
-        {/* Scroll Progress Indicator */}
-        <motion.div 
-          className="fixed top-0 left-0 h-1 bg-blue-500 z-50" 
-          style={{ 
-            width: scrollIndicatorWidth,
-            transformOrigin: 'left center' 
-          }} 
+    <div className="relative w-full min-h-screen bg-background overflow-hidden">
+      <Head>
+        <title>Computer Science and Engineering Association</title>
+        <meta
+          name="description"
+          content="Empowering future tech leaders through innovation, collaboration, and excellence."
         />
+        <link rel="icon" href="/logo/logo.webp" />
+      </Head>
 
+      {/* Floating Navbar */}
+      <Navbar activeSection={activeSection} />
+
+      {/* Global Loading Overlay */}
+      <GlobalLoading />
+
+      {/* Main Content */}
+      <main className="relative w-full overflow-hidden">
         {/* Smooth Scrollable Container */}
-        <motion.div 
-          ref={scrollRef}
-          className="scroll-container overflow-y-scroll h-screen"
-          style={{ 
-            scrollBehavior: 'smooth',
-            overscrollBehavior: 'contain'
+        <motion.div
+          className="scroll-container relative w-full"
+          style={{
+            scrollBehavior: "smooth",
+            overscrollBehavior: "contain",
           }}
         >
-          {sections.map(({ id, component: Section }) => (
+          {sections.map(({ id, component: Section }, index) => (
             <motion.section
               key={id}
               id={id}
-              className="min-h-screen flex flex-col justify-center items-center relative"
+              className="min-h-screen w-full flex flex-col justify-center items-center relative"
               initial={{ opacity: 0 }}
-              whileInView={{ 
-                opacity: 1,
-                transition: { duration: 0.8 } 
-              }}
-              viewport={{ once: false }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: false, margin: "-20%" }}
             >
-              <Section onNextSection={scrollToNextSection} data={data} />
+              {index === 0 ? (
+                <Section onNextSection={scrollToNextSection} data={data} />
+              ) : (
+                <AuroraBackground>
+                  <motion.div
+                    initial={{ opacity: 0.0, y: 40 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -40 }}
+                    transition={{
+                      delay: 0.3,
+                      duration: 0.1,
+                      ease: "easeInOut",
+                    }}
+                    className="relative flex flex-col gap-4 items-center justify-center px-4 py-16 w-full max-w-7xl mx-auto"
+                  >
+                    <Section onNextSection={scrollToNextSection} data={data} />
+                  </motion.div>
+                </AuroraBackground>
+              )}
             </motion.section>
           ))}
 
           <Footer />
         </motion.div>
-      </div>
-    </ThemeProvider>
-  );
+      </main>
+    </div>
+  )
 }
 
-//fetch carousel events, office bearers, magazines, and gallery images
+// Server-side data fetching remains the same
 export async function getServerSideProps() {
   try {
-    const data = await fetchData(process.env.NEXT_PUBLIC_BASE_URL);
+    const data = await fetchData(process.env.NEXT_PUBLIC_BASE_URL)
     return {
       props: {
         initialData: data,
-      }
-    };
+      },
+    }
   } catch (error) {
-    console.error('Error fetching data:', error);
+    console.error("Error fetching data:", error)
     return {
       props: {
         initialData: null,
-        error: 'Failed to fetch data',
+        error: "Failed to fetch data",
       },
-    };
+    }
   }
 }

@@ -1,10 +1,11 @@
 import HomeSection from '@/components/sections/HomeSection';
 import AboutSection from '@/components/sections/AboutSection';
-import WinnersSection from '@/components/sections/WinnersSection';
+//import WinnersSection from '@/components/sections/WinnersSection';
 import GallerySection from '@/components/sections/GallerySection';
 import EventsSection from '@/components/sections/EventsSection';
 import OfficeBearersSection from '@/components/sections/OfficeBearersSection';
 import { MagazineSection } from '@/components/sections/MagazineSection';
+import { id } from 'date-fns/locale';
 
 const sections = [
   { id: 'home', component: HomeSection },
@@ -27,15 +28,14 @@ const sections = [
       />
     ) 
   },
-  { id: 'winners', component: WinnersSection },
-  { 
-    id: 'magazine', 
+  {
+    id: 'magazine',
     component: ({ onNextSection, data }) => (
-      <MagazineSection 
-        magazines={data.magazines} 
-        onNextSection={onNextSection} 
+      <MagazineSection
+        magazines={data.magazines}
+        onNextSection={onNextSection}
       />
-    ) 
+    )  
   },
   { 
     id: 'gallery', 

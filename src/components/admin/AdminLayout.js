@@ -5,20 +5,22 @@ import { signOut } from 'next-auth/react';
 import { 
   LayoutDashboard,
   Camera,
-  Calendar, 
-  Trophy, 
+  Calendar,
   Users, 
   Mail, 
   BookOpen,
   LogOut,
   Menu,
   X,
-  ChevronLeft
+  ChevronLeft,
+  Sun,
+  Moon
 } from 'lucide-react';
 import React from 'react';
 
 const AdminLayout = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -26,20 +28,29 @@ const AdminLayout = ({ children }) => {
     if (savedSidebarState !== null) {
       setIsSidebarOpen(JSON.parse(savedSidebarState));
     }
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme !== null) {
+      setIsDarkMode(savedTheme === 'dark');
+      document.body.classList.toggle('dark', savedTheme === 'dark');
+    }
   }, []);
 
   useEffect(() => {
     localStorage.setItem('isSidebarOpen', JSON.stringify(isSidebarOpen));
   }, [isSidebarOpen]);
 
+  useEffect(() => {
+    localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+    document.body.classList.toggle('dark', isDarkMode);
+  }, [isDarkMode]);
+
   const navigation = useMemo(() => [
     { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
     { name: 'Events', href: '/admin/events', icon: Calendar },
     { name: 'Gallery', href: '/admin/gallery', icon: Camera },
-    { name: 'Winners', href: '/admin/winners', icon: Trophy },
     { name: 'Office Bearers', href: '/admin/office-bearers', icon: Users },
-    { name: 'Contact Messages', href: '/admin/messages', icon: Mail },
     { name: 'Magazine', href: '/admin/magazine', icon: BookOpen },
+    { name: 'Contact Messages', href: '/admin/messages', icon: Mail },
   ], []);
 
   const handleSignOut = useMemo(() => async () => {
@@ -47,7 +58,7 @@ const AdminLayout = ({ children }) => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-gray-100 text-black'}`}>
       {/* Mobile sidebar toggle */}
       <button
         className="fixed top-4 left-4 z-50 lg:hidden"
@@ -102,14 +113,20 @@ const AdminLayout = ({ children }) => {
             </ul>
           </nav>
 
-          {/* Logout button */}
-          <div className="border-t p-4">
+          {/* Logout and Theme switch buttons */}
+          <div className="border-t p-4 flex justify-between items-center">
             <button
               onClick={handleSignOut}
-              className="flex w-full items-center rounded-lg px-4 py-2 text-sm text-gray-600 hover:bg-gray-50"
+              className="flex items-center rounded-lg px-4 py-2 text-sm text-gray-600 hover:bg-gray-50"
             >
               <LogOut className="mr-3 h-5 w-5" />
               Sign out
+            </button>
+            <button
+              onClick={() => setIsDarkMode(!isDarkMode)}
+              className="flex items-center rounded-lg px-4 py-2 text-sm text-gray-600 hover:bg-gray-50"
+            >
+              {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
             </button>
           </div>
         </div>

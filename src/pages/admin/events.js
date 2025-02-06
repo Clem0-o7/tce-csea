@@ -10,13 +10,13 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { format, parseISO } from 'date-fns';
 import { cn } from '@/lib/utils';
-import { CalendarIcon, Plus, Pencil, Trash2, ExternalLink } from 'lucide-react';
+import { CalendarIcon, Pencil, Trash2, ExternalLink } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 
 export default function EventsAdminPage() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const [events, setEvents] = useState([]);
   const [isEditMode, setIsEditMode] = useState(false);
   const [currentEvent, setCurrentEvent] = useState(null);
@@ -37,8 +37,10 @@ export default function EventsAdminPage() {
   const [success, setSuccess] = useState('');
 
   useEffect(() => {
-    fetchEvents();
-  }, []);
+    if (status === 'authenticated') {
+      fetchEvents();
+    }
+  }, [status]);
 
   const fetchEvents = async () => {
     try {
@@ -69,7 +71,9 @@ export default function EventsAdminPage() {
   };
 
   const handleDateSelect = (date) => {
-    setFormData(prev => ({ ...prev, date }));
+    if (date) {
+      setFormData(prev => ({ ...prev, date: date.toISOString() }));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -79,6 +83,7 @@ export default function EventsAdminPage() {
 
     const eventData = {
       ...formData,
+      date: formData.date instanceof Date ? formData.date.toISOString() : new Date(formData.date).toISOString(), 
       eventImage: convertGDriveLink(formData.eventImage)
     };
 
@@ -109,7 +114,7 @@ export default function EventsAdminPage() {
     setCurrentEvent(event);
     setFormData({
       ...event,
-      date: parseISO(event.date)
+      date: event.date ? new Date(event.date) : new Date(), // Ensure date is a Date object
     });
   };
 
@@ -215,7 +220,7 @@ export default function EventsAdminPage() {
                         {formData.date ? format(formData.date, "PPP") : <span>Pick a date</span>}
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
+                    <PopoverContent className="w-auto h-auto p-0 z-50">
                       <Calendar
                         mode="single"
                         selected={formData.date}
@@ -331,7 +336,7 @@ export default function EventsAdminPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {events.map((event) => (
+              {events.slice().reverse().map((event) => (
                 <div
                   key={event.id}
                   className="flex items-center justify-between p-4 border rounded-lg"

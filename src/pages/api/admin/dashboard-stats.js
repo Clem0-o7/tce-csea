@@ -1,5 +1,5 @@
 import { db } from '@/db/db';
-import { events, galleryImages, eventWinners, officeBearers, contactSubmissions, magazines } from '@/db/schema';
+import { events, galleryImages, officeBearers, contactSubmissions, magazines } from '@/db/schema';
 import { eq, sql } from 'drizzle-orm';
 
 export default async function handler(req, res) {
@@ -11,14 +11,12 @@ export default async function handler(req, res) {
     const [
       eventsCount,
       galleryCount,
-      winnersCount,
       officeBearersCount,
       unreadMessagesCount,
       magazinesCount
     ] = await Promise.all([
       db.select({ count: sql`count(*)` }).from(events).then(rows => rows[0].count),
       db.select({ count: sql`count(*)` }).from(galleryImages).then(rows => rows[0].count),
-      db.select({ count: sql`count(*)` }).from(eventWinners).then(rows => rows[0].count),
       db.select({ count: sql`count(*)` }).from(officeBearers).then(rows => rows[0].count),
       db.select({ count: sql`count(*)` }).from(contactSubmissions).where(eq(contactSubmissions.status, 'unread')).then(rows => rows[0].count),
       db.select({ count: sql`count(*)` }).from(magazines).then(rows => rows[0].count)
@@ -27,7 +25,6 @@ export default async function handler(req, res) {
     res.status(200).json({
       events: eventsCount,
       gallery: galleryCount,
-      winners: winnersCount,
       officeBearers: officeBearersCount,
       messages: unreadMessagesCount,
       magazines: magazinesCount

@@ -248,7 +248,7 @@ export default function GalleryAdminPage() {
                       setFormData(prev => ({ ...prev, in_carousal: checked }))
                     }
                   />
-                  <Label htmlFor="in_carousal">Show in Carousel</Label>
+                  <Label htmlFor="in_carousal">Show in Grid</Label>
                 </div>
               </div>
 

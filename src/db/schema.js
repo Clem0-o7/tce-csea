@@ -1,8 +1,5 @@
-//db/schema.js
-import { pgTable, uuid, text, timestamp, 
-  integer, boolean, varchar, 
-  date, jsonb, primaryKey, 
-  unique, pgEnum, index } from 'drizzle-orm/pg-core';
+// filepath: /d:/Projects/tce-csea/src/db/schema.js
+import { pgTable, uuid, text, timestamp, integer, boolean, varchar, date, jsonb, primaryKey, unique, pgEnum, index } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
 // Enum definitions
@@ -50,23 +47,6 @@ export const events = pgTable('events', {
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow()  
 });
-
-// Event Winners Table
-// Event Winners Table
-export const eventWinners = pgTable('event_winners', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  personId: uuid('person_id').references(() => persons.id),  // Track the person who won
-  rank: rankEnum('rank'),
-  pointsEarned: integer('points_earned'),
-  eventName: varchar('event_name', { length: 255 }),  // Name of the event (no longer related to the events table)
-  eventDate: date('event_date'),  // Event date
-  year: varchar('year', { length: 20 }),
-  isTeam: boolean('is_team').default(false),
-  teamName: varchar('team_name', { length: 255 }),  // Track team name if needed
-}, (table) => ({
-  personIdIndex: index('person_id_index').on(table.personId)
-}));
-
 
 // Office Bearers Table
 export const officeBearers = pgTable('office_bearers', {
@@ -131,23 +111,11 @@ export const magazines = pgTable('magazines', {
 
 // Relationship Definitions
 export const personRelations = relations(persons, ({ many }) => ({
-  eventWinners: many(eventWinners),
   officeBearers: many(officeBearers)
 }));
 
 export const eventRelations = relations(events, ({ many }) => ({
-  winners: many(eventWinners)
-}));
-
-export const eventWinnersRelations = relations(eventWinners, ({ one }) => ({
-  event: one(events, {
-    fields: [eventWinners.eventId],
-    references: [events.id]
-  }),
-  person: one(persons, {
-    fields: [eventWinners.personId],
-    references: [persons.id]
-  })
+  // winners: many(eventWinners)
 }));
 
 export const officeBearersRelations = relations(officeBearers, ({ one }) => ({
@@ -156,6 +124,3 @@ export const officeBearersRelations = relations(officeBearers, ({ one }) => ({
     references: [persons.id]
   })
 }));
-
-
-export const magazineRelations = relations(magazines, () => ({}));
