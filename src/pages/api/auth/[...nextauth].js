@@ -1,4 +1,3 @@
-// pages/api/auth/[...nextauth].js
 import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { db } from '@/db/db';
@@ -11,8 +10,8 @@ export const authOptions = {
     CredentialsProvider({
       name: 'Credentials',
       credentials: {
-        username: { label: "Username", type: "text" },
-        password: { label: "Password", type: "password" }
+        username: { label: 'Username', type: 'text' },
+        password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
         try {
@@ -20,7 +19,7 @@ export const authOptions = {
             throw new Error('Please enter username and password');
           }
 
-          // Find the user - using the same query structure as in create-admin
+          // Find the user
           const users = await db
             .select()
             .from(adminUsers)
@@ -35,10 +34,7 @@ export const authOptions = {
           }
 
           // Compare passwords
-          const isValid = await bcrypt.compare(
-            credentials.password,
-            user.hashedPassword
-          );
+          const isValid = await bcrypt.compare(credentials.password, user.hashedPassword);
 
           if (!isValid) {
             console.log('Invalid password');
@@ -82,8 +78,23 @@ export const authOptions = {
       return session;
     },
   },
+  session: {
+    strategy: 'jwt', 
+    maxAge: 24 * 60 * 60, // (1 day)
+  },
+  cookies: {
+    sessionToken: {
+      name: `next-auth.session-token`, 
+      options: {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production', 
+        sameSite: 'lax', 
+        path: '/',
+      },
+    },
+  },
   debug: process.env.NODE_ENV === 'development',
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: process.env.NEXTAUTH_SECRET, 
 };
 
 export default NextAuth(authOptions);
