@@ -1,5 +1,5 @@
 import { SessionProvider } from 'next-auth/react';
-import { Providers } from './_providers';
+import  Providers from './_providers';
 import '@/styles/globals.css';
 import { Inter } from 'next/font/google';
 import { useRouter } from 'next/router';

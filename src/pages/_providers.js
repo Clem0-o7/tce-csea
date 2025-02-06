@@ -1,12 +1,10 @@
-// @/pages/_providers.js
-'use client'
+// src/pages/_providers.js
+import { ThemeProvider } from 'next-themes';
 
-import { ThemeProvider } from 'next-themes'
-
-export function Providers({ children }) {
+export default function Providers({ children }) {
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
       {children}
     </ThemeProvider>
-  )
+  );
 }
