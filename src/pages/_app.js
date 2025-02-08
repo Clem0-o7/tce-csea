@@ -8,6 +8,8 @@ import { useEffect } from 'react';
 import { LoadingProvider, useLoading } from '@/contexts/LoadingContext';
 import GlobalLoading from '@/components/GlobalLoading';
 
+//Test Changes
+
 const inter = Inter({ subsets: ['latin'] });
 
 function MyApp({ Component, pageProps: { session, ...pageProps } }) {
