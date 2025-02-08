@@ -1,3 +1,4 @@
+// pages/api/auth/[...nextauth].js
 import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { db } from '@/db/db';
@@ -17,10 +18,8 @@ export const authOptions = {
         try {
           if (!credentials?.username || !credentials?.password) {
             console.error('Missing credentials');
-            throw new Error('Missing credentials');
+            return null;
           }
-
-          console.log('Checking user:', credentials.username);
 
           const users = await db
             .select()
@@ -28,23 +27,21 @@ export const authOptions = {
             .where(eq(adminUsers.username, credentials.username))
             .limit(1);
 
-          if (users.length === 0) {
-            console.error('User not found');
-            throw new Error('Invalid credentials');
-          }
-
           const user = users[0];
 
           if (!user || !user.hashedPassword) {
-            console.error('User has no password set');
-            throw new Error('Invalid credentials');
+            console.error('User not found or missing password');
+            return null;
           }
 
-          const isValid = await bcrypt.compare(credentials.password, user.hashedPassword);
+          const isValid = await bcrypt.compare(
+            credentials.password,
+            user.hashedPassword
+          );
 
           if (!isValid) {
             console.error('Invalid password');
-            throw new Error('Invalid credentials');
+            return null;
           }
 
           // Update last login
@@ -53,23 +50,23 @@ export const authOptions = {
             .set({ lastLogin: new Date() })
             .where(eq(adminUsers.id, user.id));
 
-          console.log('User authenticated:', user.username);
-
           return {
             id: user.id.toString(),
             username: user.username,
             role: user.role,
+            email: user.email || `${user.username}@example.com`, // Default email
+            name: user.username || 'Admin User', // Default name
           };
         } catch (error) {
-          console.error('Authorize error:', error);
-          throw new Error('Authentication failed');
+          console.error('Auth error:', error);
+          return null;
         }
       },
     }),
   ],
   pages: {
     signIn: '/admin/login',
-    error: '/admin/login', // Redirect errors to login page
+    error: '/admin/login',
   },
   callbacks: {
     async jwt({ token, user }) {
@@ -77,6 +74,8 @@ export const authOptions = {
         token.id = user.id;
         token.role = user.role;
         token.username = user.username;
+        token.email = user.email || `${user.username}@example.com`; // Ensure email
+        token.name = user.name || user.username || 'Admin User'; // Ensure name
       }
       return token;
     },
@@ -85,14 +84,16 @@ export const authOptions = {
         session.user.id = token.id;
         session.user.role = token.role;
         session.user.username = token.username;
+        session.user.email = token.email;
+        session.user.name = token.name;
       }
       return session;
     },
   },
-  debug: process.env.NODE_ENV === 'production', // Enable debug logs in production
+  debug: process.env.NODE_ENV === 'development',
   session: {
     strategy: 'jwt',
-    maxAge: 24 * 60 * 60, // 1 day
+    maxAge: 24 * 60 * 60,
   },
   secret: process.env.NEXTAUTH_SECRET,
 };
@@ -101,20 +102,9 @@ const authHandler = NextAuth(authOptions);
 
 export default async function handler(req, res) {
   try {
-    if (!process.env.NEXTAUTH_SECRET) {
-      console.error('NEXTAUTH_SECRET is missing in production');
-      return res.status(500).json({ error: 'Server configuration error' });
-    }
-
-    console.log(`Auth request: ${req.method} ${req.url}`);
-
     await authHandler(req, res);
   } catch (error) {
     console.error('NextAuth Error:', error);
-
-    // Ensure the response is always JSON
-    if (!res.headersSent) {
-      res.status(500).json({ error: 'Internal authentication error' });
-    }
+    res.status(500).json({ error: 'Internal authentication error' });
   }
-}
+};
