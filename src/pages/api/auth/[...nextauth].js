@@ -17,7 +17,6 @@ export const authOptions = {
       async authorize(credentials, req) {
         try {
           if (!credentials?.username || !credentials?.password) {
-            console.error('Missing credentials');
             return null;
           }
 
@@ -30,7 +29,6 @@ export const authOptions = {
           const user = users[0];
 
           if (!user || !user.hashedPassword) {
-            console.error('User not found or missing password');
             return null;
           }
 
@@ -40,7 +38,6 @@ export const authOptions = {
           );
 
           if (!isValid) {
-            console.error('Invalid password');
             return null;
           }
 
@@ -54,8 +51,6 @@ export const authOptions = {
             id: user.id.toString(),
             username: user.username,
             role: user.role,
-            email: user.email || `${user.username}@example.com`, // Default email
-            name: user.username || 'Admin User', // Default name
           };
         } catch (error) {
           console.error('Auth error:', error);
@@ -66,7 +61,7 @@ export const authOptions = {
   ],
   pages: {
     signIn: '/admin/login',
-    error: '/admin/login',
+    error: '/admin/login', // Add this
   },
   callbacks: {
     async jwt({ token, user }) {
@@ -74,8 +69,6 @@ export const authOptions = {
         token.id = user.id;
         token.role = user.role;
         token.username = user.username;
-        token.email = user.email || `${user.username}@example.com`; // Ensure email
-        token.name = user.name || user.username || 'Admin User'; // Ensure name
       }
       return token;
     },
@@ -84,8 +77,6 @@ export const authOptions = {
         session.user.id = token.id;
         session.user.role = token.role;
         session.user.username = token.username;
-        session.user.email = token.email;
-        session.user.name = token.name;
       }
       return session;
     },
@@ -107,4 +98,4 @@ export default async function handler(req, res) {
     console.error('NextAuth Error:', error);
     res.status(500).json({ error: 'Internal authentication error' });
   }
-};
+}
