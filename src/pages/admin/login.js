@@ -12,77 +12,37 @@ export default function AdminLogin() {
   const { data: session, status } = useSession();
   const { theme } = useTheme();
 
-  // Handle redirect if already authenticated
   useEffect(() => {
     if (status === 'loading') return;
-    
     if (status === 'authenticated') {
-      const redirect = router.query.callbackUrl || '/admin/dashboard';
-      router.replace(redirect);
+      router.replace('/admin/dashboard');
     }
   }, [status, router]);
 
-  // Reset error when inputs change
-  useEffect(() => {
-    if (error) setError('');
-  }, [username, password]);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (isLoading) return;
-    
     setIsLoading(true);
     setError('');
 
     try {
-      // Validate inputs
-      if (!username.trim() || !password.trim()) {
-        setError('Please enter both username and password');
-        return;
-      }
-
-      // Get callback URL from query params or use default
-      const callbackUrl = router.query.callbackUrl || '/admin/dashboard';
-
+      console.log('Attempting login with username:', username);
       const result = await signIn('credentials', {
-        username: username.trim(),
-        password: password.trim(),
+        username,
+        password,
         redirect: false,
-        callbackUrl
+        callbackUrl: '/admin/dashboard'
       });
 
-      if (!result) {
-        throw new Error('Authentication failed');
-      }
+      console.log('Sign in result:', result);
 
-      if (result.error) {
-        // Handle specific error messages
-        switch (result.error) {
-          case 'CredentialsSignin':
-            setError('Invalid username or password');
-            break;
-          case 'AccessDenied':
-            setError('Access denied. Please contact administrator.');
-            break;
-          default:
-            setError(result.error || 'Failed to sign in');
-        }
-        return;
-      }
-
-      if (result.ok) {
-        // Clear form
-        setUsername('');
-        setPassword('');
-        
-        // Redirect with fallback
-        try {
-          await router.push(result.url || callbackUrl);
-        } catch (routerError) {
-          console.error('Navigation failed:', routerError);
-          window.location.href = callbackUrl; // Fallback redirect
-        }
+      if (result?.error) {
+        console.error('Sign in error:', result.error);
+        setError(result.error);
+      } else if (result?.ok) {
+        console.log('Login successful, redirecting...');
+        await router.push('/admin/dashboard');
+      } else {
+        setError('An unexpected error occurred');
       }
     } catch (error) {
       console.error('Login error:', error);
@@ -92,7 +52,6 @@ export default function AdminLogin() {
     }
   };
 
-  // Show loading state
   if (status === 'loading') {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -101,7 +60,6 @@ export default function AdminLogin() {
     );
   }
 
-  // Hide form if authenticated
   if (status === 'authenticated') {
     return null;
   }
@@ -122,7 +80,7 @@ export default function AdminLogin() {
             Admin Login
           </h2>
         </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit} noValidate>
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
               <label htmlFor="username" className="sr-only">
@@ -142,7 +100,6 @@ export default function AdminLogin() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 disabled={isLoading}
-                autoComplete="username"
               />
             </div>
             <div>
@@ -163,7 +120,6 @@ export default function AdminLogin() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={isLoading}
-                autoComplete="current-password"
               />
             </div>
           </div>

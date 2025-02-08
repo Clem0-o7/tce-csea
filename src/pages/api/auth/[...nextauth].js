@@ -12,9 +12,9 @@ export const authOptions = {
       name: 'Credentials',
       credentials: {
         username: { label: 'Username', type: 'text' },
-        password: { label: 'Password', type: 'password' },
+        password: { label: 'Password', type: 'password' }
       },
-      async authorize(credentials, req) {
+      async authorize(credentials) {
         try {
           if (!credentials?.username || !credentials?.password) {
             return null;
@@ -41,27 +41,20 @@ export const authOptions = {
             return null;
           }
 
-          // Update last login
-          await db
-            .update(adminUsers)
-            .set({ lastLogin: new Date() })
-            .where(eq(adminUsers.id, user.id));
-
           return {
             id: user.id.toString(),
             username: user.username,
-            role: user.role,
+            role: user.role
           };
         } catch (error) {
           console.error('Auth error:', error);
           return null;
         }
-      },
-    }),
+      }
+    })
   ],
   pages: {
-    signIn: '/admin/login',
-    error: '/admin/login', // Add this
+    signIn: '/admin/login'
   },
   callbacks: {
     async jwt({ token, user }) {
@@ -79,23 +72,11 @@ export const authOptions = {
         session.user.username = token.username;
       }
       return session;
-    },
+    }
   },
-  debug: process.env.NODE_ENV === 'development',
   session: {
-    strategy: 'jwt',
-    maxAge: 24 * 60 * 60,
-  },
-  secret: process.env.NEXTAUTH_SECRET,
+    strategy: 'jwt'
+  }
 };
 
-const authHandler = NextAuth(authOptions);
-
-export default async function handler(req, res) {
-  try {
-    await authHandler(req, res);
-  } catch (error) {
-    console.error('NextAuth Error:', error);
-    res.status(500).json({ error: 'Internal authentication error' });
-  }
-}
+export default NextAuth(authOptions);
