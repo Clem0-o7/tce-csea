@@ -1,4 +1,3 @@
-// pages/api/auth/[...nextauth].js
 import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { db } from '@/db/db';
@@ -17,8 +16,11 @@ export const authOptions = {
       async authorize(credentials, req) {
         try {
           if (!credentials?.username || !credentials?.password) {
-            return null;
+            console.error('Missing credentials');
+            throw new Error('Missing credentials');
           }
+
+          console.log('Checking user:', credentials.username);
 
           const users = await db
             .select()
@@ -26,19 +28,23 @@ export const authOptions = {
             .where(eq(adminUsers.username, credentials.username))
             .limit(1);
 
+          if (users.length === 0) {
+            console.error('User not found');
+            throw new Error('Invalid credentials');
+          }
+
           const user = users[0];
 
           if (!user || !user.hashedPassword) {
-            return null;
+            console.error('User has no password set');
+            throw new Error('Invalid credentials');
           }
 
-          const isValid = await bcrypt.compare(
-            credentials.password,
-            user.hashedPassword
-          );
+          const isValid = await bcrypt.compare(credentials.password, user.hashedPassword);
 
           if (!isValid) {
-            return null;
+            console.error('Invalid password');
+            throw new Error('Invalid credentials');
           }
 
           // Update last login
@@ -47,21 +53,23 @@ export const authOptions = {
             .set({ lastLogin: new Date() })
             .where(eq(adminUsers.id, user.id));
 
+          console.log('User authenticated:', user.username);
+
           return {
             id: user.id.toString(),
             username: user.username,
             role: user.role,
           };
         } catch (error) {
-          console.error('Auth error:', error);
-          return null;
+          console.error('Authorize error:', error);
+          throw new Error('Authentication failed');
         }
       },
     }),
   ],
   pages: {
     signIn: '/admin/login',
-    error: '/admin/login', // Add this
+    error: '/admin/login', // Redirect errors to login page
   },
   callbacks: {
     async jwt({ token, user }) {
@@ -81,10 +89,10 @@ export const authOptions = {
       return session;
     },
   },
-  debug: process.env.NODE_ENV === 'development',
+  debug: process.env.NODE_ENV === 'production', // Enable debug logs in production
   session: {
     strategy: 'jwt',
-    maxAge: 24 * 60 * 60,
+    maxAge: 24 * 60 * 60, // 1 day
   },
   secret: process.env.NEXTAUTH_SECRET,
 };
@@ -93,9 +101,20 @@ const authHandler = NextAuth(authOptions);
 
 export default async function handler(req, res) {
   try {
+    if (!process.env.NEXTAUTH_SECRET) {
+      console.error('NEXTAUTH_SECRET is missing in production');
+      return res.status(500).json({ error: 'Server configuration error' });
+    }
+
+    console.log(`Auth request: ${req.method} ${req.url}`);
+
     await authHandler(req, res);
   } catch (error) {
     console.error('NextAuth Error:', error);
-    res.status(500).json({ error: 'Internal authentication error' });
+
+    // Ensure the response is always JSON
+    if (!res.headersSent) {
+      res.status(500).json({ error: 'Internal authentication error' });
+    }
   }
 }
