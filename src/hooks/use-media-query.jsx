@@ -1,3 +1,5 @@
+//@/hooks/use-media-query.jsx
+
 import { useState, useEffect } from 'react';
 
 export function useMediaQuery(query) {
