@@ -40,7 +40,8 @@ export default function Home() {
         alt="College Building"
         fill
         quality={100}
-        priority
+        priority={true}
+        loading="eager"
         className="object-cover object-center"
       />
       <div className="absolute inset-0 bg-black/50 transition-colors duration-300"></div>

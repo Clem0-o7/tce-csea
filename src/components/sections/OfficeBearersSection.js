@@ -92,12 +92,12 @@ const OfficeBearersSection = ({ officeBearers = [] }) => {
             ))}
           </div>
         ) : (
-          // Desktop View (Scroll Layout)
-          <div className="relative flex space-x-4 md:space-x-8 overflow-x-auto pb-4 snap-x snap-mandatory w-full max-w-5xl">
+          // Desktop View (Two Rows Grid Layout)
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {sortedBearers.map((bearer) => (
               <motion.div
                 key={bearer.id}
-                className={`flex-shrink-0 w-[150px] md:w-[200px] p-2 rounded-lg transition-all duration-300 snap-center ${
+                className={`p-2 rounded-lg transition-all duration-300 text-center ${
                   hoveredCard === bearer.id ? 'scale-105 shadow-xl' : 'scale-100 shadow-md'
                 } ${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-black'}`}
                 onHoverStart={() => setHoveredCard(bearer.id)}
