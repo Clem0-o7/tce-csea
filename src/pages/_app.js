@@ -1,4 +1,4 @@
-import { SessionProvider } from 'next-auth/react';
+
 import  Providers from './_providers';
 import '@/styles/globals.css';
 import { Inter } from 'next/font/google';
@@ -8,7 +8,7 @@ import { useEffect } from 'react';
 import { LoadingProvider, useLoading } from '@/contexts/LoadingContext';
 import GlobalLoading from '@/components/GlobalLoading';
 
-//Test Changes
+
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -17,7 +17,7 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }) {
   const shouldApplyBackground = router.pathname !== '/' && !router.pathname.startsWith('/admin');
 
   return (
-    <SessionProvider session={session}>
+   
       <LoadingProvider>
         <LoadingHandler />
         <GlobalLoading />
@@ -32,7 +32,7 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }) {
           </div>
         </Providers>
       </LoadingProvider>
-    </SessionProvider>
+   
   );
 }
 
