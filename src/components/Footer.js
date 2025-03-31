@@ -49,21 +49,20 @@ const Footer = () => {
             &copy; {new Date().getFullYear()} CSEA. All rights reserved.
           </p>
           <p className="text-xs flex items-center justify-center space-x-1 mt-2">
-  <span>Developed by</span>
-  <Link
-    href="https://www.linkedin.com/in/clement-andrew-"
-    className="flex items-center hover:text-primary transition-colors underline"
-    target="_blank"
-    rel="noopener noreferrer"
-  >
-    <img 
-  src="/signature.png" 
-  alt="Clement Andrew Signature" 
-  className="h-12 w-auto ml-0 opacity-90 transition-opacity hover:opacity-100"
-/>
-
-  </Link>
-</p>
+            <span>Developed by</span>
+            <Link
+              href="https://www.linkedin.com/in/clement-andrew-"
+              className="flex items-center hover:text-primary transition-colors underline"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img
+                src="/signature.png"
+                alt="Clement Andrew Signature"
+                className="h-12 w-auto ml-0 opacity-90 transition-opacity hover:opacity-100 dark:invert"
+              />
+            </Link>
+          </p>
 
         </div>
       </div>

@@ -1,52 +1,43 @@
-"use client";
-import { cn } from "@/lib/utils";
-import React from "react";
-import { motion } from "framer-motion"; // Import motion from framer-motion
+"use client"
+import { cn } from "@/lib/utils"
+import { motion } from "framer-motion"
 
-export const AuroraBackground = ({
-  className,
-  children,
-  showRadialGradient = true,
-  ...props
-}) => {
+export const AuroraBackground = ({ className, children, showRadialGradient = true, ...props }) => {
   return (
     <motion.div
-      className={cn(
-        "relative w-full min-h-screen bg-zinc-50 dark:bg-zinc-900 text-slate-950 transition-bg",
-        className
-      )}
-      initial={{ opacity: 0.0, y: 40 }} // Initial state for animation
-      whileInView={{ opacity: 1, y: 0 }} // Animation state when in view
+      className={cn("relative w-full min-h-screen bg-zinc-50 dark:bg-zinc-900 text-slate-950 transition-bg", className)}
+      initial={{ opacity: 0.0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
       transition={{
-        delay: 0.3, // Delay before the animation starts
-        duration: 0.8, // Duration of the animation
-        ease: "easeInOut", // Easing function for smooth transition
+        delay: 0.3,
+        duration: 0.8,
+        ease: "easeInOut",
       }}
       {...props}
     >
       <div className="absolute inset-0 overflow-hidden">
-        <motion.div
-          className={cn(`
-            [--white-gradient:repeating-linear-gradient(100deg,var(--white)_0%,var(--white)_7%,var(--transparent)_10%,var(--transparent)_12%,var(--white)_16%)]
-            [--dark-gradient:repeating-linear-gradient(100deg,var(--black)_0%,var(--black)_7%,var(--transparent)_10%,var(--transparent)_12%,var(--black)_16%)]
-            [--aurora:repeating-linear-gradient(100deg,var(--blue-500)_10%,var(--indigo-300)_15%,var(--blue-300)_20%,var(--violet-200)_25%,var(--blue-400)_30%)]
-            [background-image:var(--white-gradient),var(--aurora)]
-            dark:[background-image:var(--dark-gradient),var(--aurora)]
-            [background-size:300%,200%]
-            [background-position:50%_50%,50%_50%]
-            filter blur-[10px] invert dark:invert-0
-            after:content-[""] after:absolute after:inset-0 after:[background-image:var(--white-gradient),var(--aurora)] 
-            after:dark:[background-image:var(--dark-gradient),var(--aurora)]
-            after:[background-size:200%,100%] 
-            after:animate-aurora after:[background-attachment:fixed] after:mix-blend-difference
-            pointer-events-none
-            absolute -inset-[10px] opacity-50 will-change-transform`,
-            showRadialGradient &&
-              `[mask-image:radial-gradient(ellipse_at_100%_0%,black_10%,var(--transparent)_70%)]`
+        {/* Primary aurora effect - simplified and more performant */}
+        <div
+          className={cn(
+            "absolute inset-0 opacity-40 pointer-events-none",
+            showRadialGradient && "md:[mask-image:radial-gradient(ellipse_at_100%_0%,black_10%,transparent_70%)]",
           )}
-        ></motion.div>
+        >
+          {/* Light mode aurora */}
+          <div className="absolute inset-0 dark:opacity-0">
+            <div className="absolute top-[-10%] right-[-20%] h-[70%] w-[70%] rounded-full bg-gradient-to-br from-teal-200 via-cyan-300 to-sky-400 opacity-70 blur-[30px] animate-aurora-drift-1"></div>
+            <div className="absolute top-[20%] left-[-10%] h-[50%] w-[60%] rounded-full bg-gradient-to-tr from-violet-200 via-purple-300 to-fuchsia-300 opacity-60 blur-[30px] animate-aurora-drift-2"></div>
+          </div>
+
+          {/* Dark mode aurora */}
+          <div className="absolute inset-0 opacity-0 dark:opacity-100">
+            <div className="absolute top-[-10%] right-[-20%] h-[70%] w-[70%] rounded-full bg-gradient-to-br from-teal-900/50 via-cyan-700/50 to-sky-600/50 opacity-70 blur-[30px] animate-aurora-drift-1"></div>
+            <div className="absolute top-[20%] left-[-10%] h-[50%] w-[60%] rounded-full bg-gradient-to-tr from-violet-900/50 via-purple-700/50 to-fuchsia-700/50 opacity-60 blur-[30px] animate-aurora-drift-2"></div>
+          </div>
+        </div>
       </div>
       {children}
     </motion.div>
-  );
-};
+  )
+}
+
