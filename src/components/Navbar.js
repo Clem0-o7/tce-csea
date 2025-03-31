@@ -13,6 +13,7 @@ const navItems = [
   { href: "#events", label: "Events", icon: <Calendar className="h-5 w-5" /> },
   { href: "#office-bearers", label: "Office Bearers", icon: <Users className="h-5 w-5" /> },
   { href: "#magazine", label: "Magazine", icon: <BookOpen className="h-5 w-5" /> },
+  /* eslint-disable-next-line jsx-a11y/alt-text */
   { href: "#gallery", label: "Gallery", icon: <Image className="h-5 w-5" /> },
 ];
 
