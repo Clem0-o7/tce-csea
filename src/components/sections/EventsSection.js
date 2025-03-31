@@ -97,7 +97,9 @@ const EventsSection = ({ events = [] }) => {
                     </div>
                     <div className="p-6">
                       <h3 className="text-xl font-semibold mb-4">{event.name}</h3>
-                      <p className="text-muted-foreground text-sm mb-6 line-clamp-2">{event.description}</p>
+                      <p className="text-muted-foreground text-sm mb-6 line-clamp-2">
+                        {event.description}
+                      </p>
 
                       <div className="space-y-3 mb-6">
                         {event.date && (
@@ -119,6 +121,18 @@ const EventsSection = ({ events = [] }) => {
                           </div>
                         )}
                       </div>
+
+                      {/* Participant Count */}
+                      {event.participantsCount !== undefined && (
+                        <div className="mb-6">
+                          <span className="text-sm font-medium text-primary">
+                            {event.participantsCount}+
+                          </span>
+                          <span className="text-sm text-muted-foreground ml-1">
+                            participants
+                          </span>
+                        </div>
+                      )}
 
                       {isAfter(new Date(event.date), new Date()) && event.registrationLink && (
                         <div className="mt-auto">

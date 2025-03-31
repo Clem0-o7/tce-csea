@@ -43,6 +43,8 @@ export const events = pgTable('events', {
   teamSizeMin: integer('team_size_min'),
   teamSizeMax: integer('team_size_max'),
   in_carousal: boolean('in_carousal').default(false),
+  participantsCount: integer('participants_count').default(0),
+
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow()  
 });
