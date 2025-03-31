@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { Facebook, Twitter, Instagram, Linkedin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ContactDialog from '@/components/ContactDialog';
+import Image from "next/image";
 
 const Footer = () => {
   return (
@@ -56,9 +57,11 @@ const Footer = () => {
               target="_blank"
               rel="noopener noreferrer"
             >
-              <img
+              <Image
                 src="/signature.png"
                 alt="Clement Andrew Signature"
+                width={150} // Set appropriate width
+                height={48} // Set appropriate height
                 className="h-12 w-auto ml-0 opacity-90 transition-opacity hover:opacity-100 dark:invert"
               />
             </Link>
