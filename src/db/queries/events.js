@@ -16,6 +16,7 @@ export async function getCarouselEvents() {
         registrationLink: events.registrationLink,
         eventImage: events.eventImage,
         conductedBy: events.conductedBy,
+        participantsCount: events.participantsCount,
         teamSizeMin: events.teamSizeMin,
         teamSizeMax: events.teamSizeMax
       })
